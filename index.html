@@ -9,9 +9,9 @@
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #9fd8ff; font-family: 'Fredoka', system-ui, sans-serif; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
   canvas { display: block; touch-action: none; }
-  #hud { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); left: calc(16px + env(safe-area-inset-left, 0px)); right: calc(208px + env(safe-area-inset-right, 0px)); color: #fff; pointer-events: none; text-shadow: 0 2px 0 rgba(200,60,120,.45), 0 4px 12px rgba(0,0,0,.15); }
+  #hud { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); left: calc(16px + env(safe-area-inset-left, 0px)); right: calc(272px + env(safe-area-inset-right, 0px)); color: #fff; pointer-events: none; text-shadow: 0 2px 0 rgba(200,60,120,.45), 0 4px 12px rgba(0,0,0,.15); }
   #hud h1 { margin: 0; font-size: 40px; font-weight: 700; letter-spacing: .5px; color: #ff6fae; -webkit-text-stroke: 2px #fff; paint-order: stroke fill; }
-  #help { width: fit-content; max-width: 100%; box-sizing: border-box; margin-top: 6px; background: rgba(255,255,255,.82); color: #7a3d5c; text-shadow: none; padding: 8px 12px; border-radius: 14px; font-size: 14px; line-height: 1.5; box-shadow: 0 4px 14px rgba(120,40,90,.15); }
+  #help { position: relative; padding-right: 34px !important; width: fit-content; max-width: 100%; box-sizing: border-box; margin-top: 6px; background: rgba(255,255,255,.82); color: #7a3d5c; text-shadow: none; padding: 8px 12px; border-radius: 14px; font-size: 14px; line-height: 1.5; box-shadow: 0 4px 14px rgba(120,40,90,.15); }
   #help b { color: #ff4f9a; }
   #loading { position: fixed; inset: 0; display: grid; place-items: center; background: #ffd9ea; color: #ff4f9a; font-size: 28px; font-weight: 700; z-index: 10; transition: opacity .5s; }
   #joy { position: fixed; left: calc(24px + env(safe-area-inset-left, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.35); border: 3px solid rgba(255,255,255,.7); display: none; touch-action: none; }
@@ -24,6 +24,38 @@
   .yum { position: fixed; z-index: 11; transform: translate(-50%, -50%); font: 700 22px 'Fredoka', sans-serif; color: #ff4f9a; -webkit-text-stroke: 1.5px #fff; paint-order: stroke fill; pointer-events: none; animation: yumUp 1s ease-out forwards; }
   @keyframes yumUp { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -60%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -190%) scale(1); } }
   @media (prefers-reduced-motion: reduce) { .yum { animation-duration: .01s; } }
+  #battleHud { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; max-width: calc(100% - 32px); }
+  .bh-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; background: rgba(255,255,255,.88); border: 3px solid #fff; border-radius: 999px; padding: 5px 8px 5px 12px; box-shadow: 0 4px 14px rgba(120,40,90,.18); }
+  #hearts { display: flex; gap: 3px; }
+  #hearts svg { display: block; }
+  #battleInfo { font-size: 13px; font-weight: 600; color: #7a3d5c; font-variant-numeric: tabular-nums; }
+  #battleInfo:empty { display: none; }
+  #helpHide { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; border: none; background: #ffe1ef; color: #c2407e; font: 700 12px 'Fredoka', sans-serif; cursor: pointer; pointer-events: auto; }
+  #helpShow { margin-top: 6px; width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; background: #ff86bf; color: #fff; font: 700 16px 'Fredoka', sans-serif; cursor: pointer; pointer-events: auto; box-shadow: 0 3px 10px rgba(120,40,90,.2); }
+  #modeBtn { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(204px + env(safe-area-inset-right, 0px)); width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; background: #5fcf7a; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: pointer; box-shadow: 0 4px 14px rgba(40,120,70,.3); transition: transform .15s, background .2s; padding: 0; }
+  #modeBtn[data-mode="game"] { background: #ff5a7a; box-shadow: 0 4px 14px rgba(160,40,70,.35); }
+  #modeBtn:hover { transform: scale(1.08); }
+  #modeBtn .mode-label { font: 700 9px 'Fredoka', sans-serif; letter-spacing: .6px; line-height: 1; margin-top: 1px; }
+  #modeIcon svg { display: block; }
+  #helpHide:focus-visible, #helpShow:focus-visible, #modeBtn:focus-visible { outline: 3px solid #4cb7ff; outline-offset: 2px; }
+  @media (pointer: coarse) {
+    #hud { right: calc(244px + env(safe-area-inset-right, 0px)); }
+    #hud h1 { font-size: 30px; }
+    html #mute { width: 46px; height: 46px; top: calc(13px + env(safe-area-inset-top, 0px)); }
+    html #shopBtn, html #gemBtn, html #modeBtn { width: 48px; height: 48px; }
+    html #shopBtn { right: calc(68px + env(safe-area-inset-right, 0px)); }
+    html #gemBtn { right: calc(122px + env(safe-area-inset-right, 0px)); }
+    html #modeBtn { right: calc(176px + env(safe-area-inset-right, 0px)); }
+    html #powerChips { top: calc(68px + env(safe-area-inset-top, 0px)); }
+  }
+  #bossBar { background: rgba(255,255,255,.92); border: 3px solid #fff; border-radius: 16px; padding: 6px 12px 8px; width: min(360px, 80vw); box-shadow: 0 4px 14px rgba(120,40,90,.2); text-align: center; }
+  #bossName { font-weight: 700; color: #8a5cf0; font-size: 15px; }
+  #bossBar .bar { margin-top: 4px; height: 12px; border-radius: 999px; background: #f1e8ff; overflow: hidden; }
+  #bossFill { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #b79cff, #ff86bf); transition: width .2s; }
+  #banner { position: fixed; left: 50%; top: 32%; z-index: 16; transform: translate(-50%, -50%); font: 700 clamp(26px, 5vw, 44px) 'Fredoka', sans-serif; color: #ff4f9a; -webkit-text-stroke: 3px #fff; paint-order: stroke fill; text-align: center; text-wrap: balance; pointer-events: none; width: min(90vw, 760px); animation: bannerIn 2.6s ease-out forwards; text-shadow: 0 6px 18px rgba(120,40,90,.25); }
+  @keyframes bannerIn { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.4) rotate(-6deg); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.12) rotate(2deg); } 20% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%) scale(1); } }
+  @media (prefers-reduced-motion: reduce) { #banner { animation-duration: 2.6s; animation-timing-function: steps(1); } }
+  @media (pointer: coarse) { #battleHud { bottom: calc(232px + env(safe-area-inset-bottom, 0px)); } }
   #mute { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); width: 48px; height: 48px; border-radius: 50%; border: 3px solid #fff; background: #ff86bf; font-size: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(120,40,90,.2); }
   [hidden] { display: none !important; }
   #shopBtn { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(76px + env(safe-area-inset-right, 0px)); width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; background: #ffb13d; color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgba(120,40,90,.25); transition: transform .15s; }
@@ -99,9 +131,11 @@
 <div id="loading">Loading Kiboroni…</div>
 <div id="hud">
   <h1>Kiboroni</h1>
+  <button id="helpShow" hidden aria-label="Show tips">?</button>
   <div id="help">
-    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kiboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>X</b> fire weapon · <b>M</b> mute · <b>Shop</b> button to add things · <b>G</b> gem powers</span>
-    <span class="touch"><b>Tap</b> the floor to walk · <b>Tap</b> an object to pick it up · <b>Tap Kiboroni</b> to put it down<br><b>Drag</b> to turn camera · <b>Pinch</b> to zoom · or use the <b>stick</b>, <b>Jump</b> &amp; <b>Grab</b> buttons · <b>Shop</b> to add things · <b>Gem</b> for powers</span>
+    <button id="helpHide" aria-label="Hide tips" title="Hide tips">✕</button>
+    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kiboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>X</b> fire weapon · <b>M</b> mute · <b>Shop</b> button to add things · <b>G</b> gem powers · <b>P</b> Play / Game mode</span>
+    <span class="touch"><b>Tap</b> the floor to walk · <b>Tap</b> an object to pick it up · <b>Tap Kiboroni</b> to put it down<br><b>Drag</b> to turn camera · <b>Pinch</b> to zoom · or use the <b>stick</b>, <b>Jump</b> &amp; <b>Grab</b> buttons · <b>Shop</b> to add things · <b>Gem</b> for powers · <b>Play/Game</b> button for monsters</span>
   </div>
 </div>
 <div id="joy"><div id="knob"></div></div>
@@ -109,6 +143,9 @@
 <button id="grab">GRAB</button>
 <button id="fire" hidden>FIRE</button>
 <button id="mute" title="Sound on/off (M)">🔊</button>
+<button id="modeBtn" title="Play mode: no monsters. Click for Game mode" aria-label="Switch to Game mode">
+  <span id="modeIcon"></span><span class="mode-label" id="modeLabel">PLAY</span>
+</button>
 <button id="shopBtn" title="Shop" aria-label="Open the shop">
   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M3.5 9 5 4h14l1.5 5"/><path d="M3.5 9a2.8 2.8 0 0 0 5.67 0 2.8 2.8 0 0 0 5.66 0 2.8 2.8 0 0 0 5.67 0"/><path d="M5 12v8h14v-8"/><path d="M10 20v-5h4v5"/>
@@ -142,6 +179,14 @@
   </div>
 </div>
 <div id="trashLayer"></div>
+<div id="battleHud">
+  <div id="bossBar" hidden><span id="bossName">King Grumblob</span><div class="bar"><i id="bossFill"></i></div></div>
+  <div class="bh-row">
+    <div id="hearts" aria-label="Hearts"></div>
+    <span id="battleInfo"></span>
+  </div>
+</div>
+<div id="banner" hidden></div>
 <div id="placeBar" hidden>
   <div class="pb-row">
     <span id="placeName"></span>
@@ -1221,7 +1266,7 @@ function updatePlayer(dt, t) {
   if (keys.KeyA || keys.ArrowLeft) ix -= 1;
   if (keys.KeyD || keys.ArrowRight) ix += 1;
   ix += joy.x; iz += joy.y;
-  if (holo.open) { ix = iz = 0; mouse.target = null; mouse.grabProp = null; jumpPressed = false; }
+  if (holo.open || player.ko > 0) { ix = iz = 0; mouse.target = null; mouse.grabProp = null; jumpPressed = false; }
   // power-ups and character abilities
   const ab = kibo.skin.ability || {};
   mods.speed = (powers.has('speed') ? 1.8 : 1) * (ab.speed || 1);
@@ -1341,6 +1386,7 @@ function updatePlayer(dt, t) {
   const sq = clamp(player.squash, -0.35, 0.4);
   const air = player.grounded ? 0 : clamp(player.vy * 0.015, -0.08, 0.1);
   k.body.scale.set(1 + sq * 0.6 - air * 0.5, 1 - sq + air, 1 + sq * 0.6 - air * 0.5);
+  if (player.ko > 0) k.body.scale.set(1.35, 0.5, 1.35); // squashed flat and dizzy
 
   const walking = player.grounded && speed > 0.4;
   player.walkPhase += dt * (walking ? speed * 3.4 : 0);
@@ -1592,6 +1638,13 @@ const sfx = {
   transform() { blip(200, 900, 0.3, 0.2, 'triangle'); blip(900, 1800, 0.18, 0.12, 'sine', 0.22); },
   blipUI() { blip(900, 1100, 0.04, 0.1, 'triangle'); },
   heave() { blip(140, 320, 0.25, 0.25, 'triangle'); blip(320, 520, 0.12, 0.15, 'triangle', 0.18); },
+  boing() { blip(180, 620, 0.12, 0.2, 'sine'); blip(620, 300, 0.12, 0.14, 'sine', 0.1); },
+  squeak(pitch = 1) { blip(900 * pitch, 1500 * pitch, 0.07, 0.16, 'triangle'); blip(1500 * pitch, 1100 * pitch, 0.06, 0.1, 'triangle', 0.06); },
+  enemyPop() { blip(300, 1200, 0.1, 0.22, 'square'); [0, 1, 2].forEach(i => setTimeout(() => sfx.pop(rnd(0.05, 0.12)), 40 + i * 60)); },
+  ouch() { blip(700, 380, 0.18, 0.2, 'triangle'); blip(380, 520, 0.1, 0.12, 'triangle', 0.17); },
+  ko() { blip(1200, 200, 0.7, 0.18, 'sine'); },
+  slam() { blip(90, 40, 0.35, 0.35, 'sine'); },
+  fanfare(win) { (win ? [523, 659, 784, 1047] : [392, 370, 349, 330]).forEach((f, i) => blip(f, f * 1.01, 0.18, 0.18, 'square', i * 0.16)); },
   munch() {
     const c = audio.ctx; if (!c || audio.muted) return;
     [0, 0.11, 0.22].forEach((d, i) => {
@@ -2253,7 +2306,8 @@ function eatFood(p) {
   player.chomp = 1; player.yum = 1; player.squashV += 5;
   sfx.munch();
   snacksEaten++; renderPowerChips();
-  yumLabel(['Yum!', 'Nom nom!', 'Tasty!', 'Mmm!'][Math.floor(rnd(0, 4))]);
+  if (battle.on && battle.hearts < battle.maxHearts) { battle.hearts++; renderBattle(); yumLabel('+1 heart'); }
+  else yumLabel(['Yum!', 'Nom nom!', 'Tasty!', 'Mmm!'][Math.floor(rnd(0, 4))]);
 }
 function updateEating(dt) {
   for (let i = eatAnims.length - 1; i >= 0; i--) {
@@ -2269,13 +2323,434 @@ function updateEating(dt) {
     }
   }
 }
-function yumLabel(text) {
+function yumLabel(text, at = null, color = null) {
   const el = document.createElement('div');
   el.className = 'yum'; el.textContent = text;
-  const v = new V3(player.pos.x, player.pos.y + HEAD + 0.25, player.pos.z).project(camera);
+  if (color) el.style.color = color;
+  const v = (at ? at.clone() : new V3(player.pos.x, player.pos.y + HEAD + 0.25, player.pos.z)).project(camera);
   el.style.left = `${((v.x + 1) / 2 * innerWidth).toFixed(0)}px`; el.style.top = `${((1 - v.y) / 2 * innerHeight).toFixed(0)}px`;
   document.body.append(el);
   setTimeout(() => el.remove(), 1000);
+}
+
+// ---------------------------------------------------------------------------
+// Monsters: cute, silly enemies that pop up and chase Kiboroni
+// ---------------------------------------------------------------------------
+const battle = { on: false, hearts: 5, maxHearts: 5, invuln: 0, spawnT: 5, defeated: 0, sinceBoss: 0, bossDue: false, bossWins: 0, shake: 0 };
+const BOSS_AFTER = 8;
+const enemies = [];
+player.ko = 0;
+
+function googly(size, mats) {
+  const g = new THREE.Group();
+  const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+  const w = new THREE.Mesh(SPHG, white); w.scale.set(size, size * 1.12, size * 0.7); g.add(w);
+  const pupil = new THREE.Group(); pupil.position.z = size * 0.45; g.add(pupil);
+  const pm = new THREE.Mesh(SPHG, new THREE.MeshStandardMaterial({ color: 0x1a1020, roughness: 0.2 })); pm.scale.set(size * 0.55, size * 0.62, size * 0.32); pupil.add(pm);
+  const hl = new THREE.Mesh(SPHG, new THREE.MeshBasicMaterial({ color: 0xffffff })); hl.scale.setScalar(size * 0.17); hl.position.set(-size * 0.16, size * 0.2, size * 0.25); pupil.add(hl);
+  mats.push(white);
+  return { g, pupil };
+}
+function enemyMesh(geo, mat) { const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; return m; }
+
+function makeDustBunny() {
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const fur = new THREE.MeshStandardMaterial({ color: 0xcfc6e0, roughness: 1 }), pink = new THREE.MeshStandardMaterial({ color: 0xffb3cf, roughness: 0.8 });
+  const mats = [fur, pink];
+  const core = enemyMesh(SPHG, fur); core.scale.setScalar(0.22); core.position.y = 0.26; body.add(core);
+  for (let i = 0; i < 22; i++) {
+    const y = 1 - (i + 0.5) / 22 * 2, rr = Math.sqrt(1 - y * y), th = i * 2.4;
+    const d = new V3(Math.cos(th) * rr, y, Math.sin(th) * rr);
+    if (d.z > 0.6 && Math.abs(d.y) < 0.5) continue;
+    const f = enemyMesh(SPHG, fur); f.scale.setScalar(rnd(0.07, 0.1)); f.position.copy(d).multiplyScalar(0.21).add(new V3(0, 0.26, 0)); body.add(f);
+  }
+  [-1, 1].forEach(sd => {
+    const ear = enemyMesh(SPHG, fur); ear.scale.set(0.05, 0.15, 0.04); ear.position.set(sd * 0.1, 0.5, -0.02); ear.rotation.z = -sd * 0.3; body.add(ear);
+    const inner = enemyMesh(SPHG, pink); inner.scale.set(0.025, 0.1, 0.02); inner.position.set(sd * 0.1, 0.5, 0.015); inner.rotation.z = -sd * 0.3; body.add(inner);
+    const foot = enemyMesh(SPHG, pink); foot.scale.set(0.06, 0.035, 0.08); foot.position.set(sd * 0.09, 0.03, 0.06); body.add(foot);
+  });
+  const pupils = [-1, 1].map(sd => { const e = googly(0.075, mats); e.g.position.set(sd * 0.085, 0.31, 0.19); body.add(e.g); return e.pupil; });
+  const tongue = enemyMesh(SPHG, pink); tongue.scale.set(0.035, 0.022, 0.012); tongue.position.set(0, 0.2, 0.215); body.add(tongue);
+  return { root, body, mats, pupils, kind: 'bunny', name: 'Dust Bunny', r: 0.26, h: 0.52, hp: 1, speed: 2.9, pitch: 1.5 };
+}
+function makeGrumblob(color = 0x7fe0b0, scale = 1) {
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const jelly = new THREE.MeshPhysicalMaterial({ color, roughness: 0.25, clearcoat: 1, transparent: true, opacity: 0.92 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x3a2a40, roughness: 0.6 });
+  const mats = [jelly];
+  const blob = enemyMesh(SPHG, jelly); blob.scale.set(0.32, 0.27, 0.32); blob.position.y = 0.25; body.add(blob);
+  const pupils = [-1, 1].map(sd => { const e = googly(0.085, mats); e.g.position.set(sd * 0.1, 0.33, 0.24); body.add(e.g); return e.pupil; });
+  [-1, 1].forEach(sd => { const br = enemyMesh(new THREE.BoxGeometry(0.13, 0.03, 0.03), dark); br.position.set(sd * 0.1, 0.44, 0.25); br.rotation.z = sd * 0.38; body.add(br); });
+  const frown = enemyMesh(new THREE.TorusGeometry(0.045, 0.012, 6, 14, Math.PI), dark); frown.position.set(0, 0.17, 0.3); body.add(frown);
+  root.scale.setScalar(scale);
+  return { root, body, mats, pupils, kind: 'blob', name: 'Grumblob', r: 0.32 * scale, h: 0.52 * scale, hp: 2, speed: 3.2, pitch: 1.1 };
+}
+const sockTex = canvasTex(64, 128, (g, w, h) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#ffffff' : '#ff6f7f'; g.fillRect(0, i * h / 8, w, h / 8); } });
+function makeSockMonster() {
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const knit = new THREE.MeshStandardMaterial({ map: sockTex, roughness: 0.95 }), toeM = new THREE.MeshStandardMaterial({ color: 0xff6f7f, roughness: 0.95 });
+  const pink = new THREE.MeshStandardMaterial({ color: 0xff8fb8, roughness: 0.6 });
+  const mats = [knit, toeM];
+  const leg = enemyMesh(new THREE.CylinderGeometry(0.13, 0.13, 0.48, 20), knit); leg.position.y = 0.38; body.add(leg);
+  const cuff = enemyMesh(new THREE.TorusGeometry(0.13, 0.035, 8, 22), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 })); cuff.rotation.x = Math.PI / 2; cuff.position.y = 0.62; body.add(cuff);
+  const foot = enemyMesh(SPHG, toeM); foot.scale.set(0.14, 0.11, 0.24); foot.position.set(0, 0.11, 0.09); body.add(foot);
+  const pupils = [-1, 1].map(sd => { const e = googly(0.07, mats); e.g.position.set(sd * 0.065, 0.66, 0.07); body.add(e.g); return e.pupil; });
+  const tongue = enemyMesh(SPHG, pink); tongue.scale.set(0.05, 0.015, 0.09); tongue.position.set(0, 0.5, 0.15); tongue.rotation.x = 0.5; body.add(tongue);
+  return { root, body, mats, pupils, kind: 'sock', name: 'Sock Monster', r: 0.22, h: 0.7, hp: 3, speed: 2.3, pitch: 0.9 };
+}
+function makeKingGrumblob() {
+  const e = makeGrumblob(0xb79cff, 2.4);
+  const gold = new THREE.MeshStandardMaterial({ color: 0xffd34d, metalness: 0.5, roughness: 0.3 });
+  const crown = new THREE.Group(); crown.position.y = 0.5; e.body.add(crown);
+  crown.add(enemyMesh(new THREE.CylinderGeometry(0.13, 0.14, 0.07, 20, 1, true), gold));
+  for (let i = 0; i < 5; i++) {
+    const a = i / 5 * Math.PI * 2, sp = enemyMesh(new THREE.ConeGeometry(0.03, 0.08, 8), gold); sp.position.set(Math.cos(a) * 0.13, 0.07, Math.sin(a) * 0.13); crown.add(sp);
+    const gem = enemyMesh(SPHG, new THREE.MeshStandardMaterial({ color: [0xff5a7a, 0x4cb7ff, 0x5fcf7a][i % 3], roughness: 0.2 })); gem.scale.setScalar(0.018); gem.position.set(Math.cos(a) * 0.14, 0.005, Math.sin(a) * 0.14); crown.add(gem);
+  }
+  crown.rotation.z = 0.15;
+  const brown = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.8 });
+  [-1, 1].forEach(sd => { const m = enemyMesh(SPHG, brown); m.scale.set(0.07, 0.022, 0.025); m.position.set(sd * 0.06, 0.22, 0.305); m.rotation.z = sd * -0.35; e.body.add(m); });
+  return Object.assign(e, { kind: 'boss', name: 'King Grumblob', hp: 24, speed: 1.7, pitch: 0.6, boss: true });
+}
+
+function freeSpot(r, minDist) {
+  for (let tries = 0; tries < 40; tries++) {
+    const x = rnd(HOUSE.x1 + 1, HOUSE.x2 - 1), z = rnd(HOUSE.z1 + 1, HOUSE.z2 - 1);
+    if (Math.hypot(x - player.pos.x, z - player.pos.z) < minDist) continue;
+    let ok = true;
+    for (const c of colliders) {
+      const cx = clamp(x, c.minX, c.maxX), cz = clamp(z, c.minZ, c.maxZ);
+      if (c.top > 0.2 && c.minY < 0.8 && Math.hypot(x - cx, z - cz) < r + 0.1) { ok = false; break; }
+    }
+    if (ok) return new V3(x, 0, z);
+  }
+  return null;
+}
+function spawnEnemy(kind, at = null) {
+  const e = kind === 'boss' ? makeKingGrumblob() : kind === 'blob' ? makeGrumblob() : kind === 'sock' ? makeSockMonster() : makeDustBunny();
+  const pos = at || freeSpot(e.r, e.boss ? 5 : 4); if (!pos) return null;
+  Object.assign(e, { pos, vel: new V3(), yaw: Math.atan2(player.pos.x - pos.x, player.pos.z - pos.z), t: rnd(0, 5), seed: rnd(0, 10), maxHp: e.hp, flash: 0, state: 'spawn', k: 0, hopY: 0, jumpT: 4, jump: null, minions: false, hitCool: 0 });
+  e.baseScale = e.root.scale.x;
+  e.root.traverse(o => { o.userData.enemy = e; });
+  e.root.position.copy(pos); e.root.scale.setScalar(0.001);
+  scene.add(e.root); enemies.push(e);
+  for (let i = 0; i < 12; i++) spark(pos.clone().add(new V3(0, 0.1, 0)), [0xffffff, 0xffd34d, 0xb79cff][i % 3], new V3(rnd(-1.5, 1.5), rnd(1, 2.5), rnd(-1.5, 1.5)), 0.6, 0.05);
+  sfx.boing();
+  if (e.boss) { document.getElementById('bossBar').hidden = false; renderBattle(); }
+  return e;
+}
+function hitEnemy(e, dmg, dir) {
+  if (e.state === 'dying') return;
+  e.hp -= dmg; e.flash = 1;
+  if (dir) { const l = Math.hypot(dir.x, dir.z) || 1; e.vel.x += dir.x / l * (e.boss ? 1.5 : 5); e.vel.z += dir.z / l * (e.boss ? 1.5 : 5); }
+  sfx.squeak(e.pitch);
+  const top = e.pos.clone(); top.y += e.h + 0.2;
+  if (Math.random() < 0.5) yumLabel(['Bonk!', 'Boop!', 'Eep!', 'Oof!', 'Squish!'][Math.floor(rnd(0, 5))], top, '#8a5cf0');
+  if (e.boss && !e.minions && e.hp <= e.maxHp / 2) { // the King calls for backup
+    e.minions = true;
+    [-1, 1].forEach(sd => spawnEnemy('bunny', e.pos.clone().add(new V3(sd * 1.2, 0, 0.6))));
+    yumLabel('Guards! GUARDS!', top, '#8a5cf0');
+  }
+  if (e.hp <= 0) defeatEnemy(e, true);
+  if (e.boss) renderBattle();
+}
+// returns true if something at pos (radius r) hit an enemy
+function hitEnemiesAt(pos, r, dmg, vel, onceSet) {
+  for (const e of enemies) {
+    if (e.state === 'dying' || e.state === 'spawn' || (onceSet && onceSet.has(e))) continue;
+    const cy = e.pos.y + e.h / 2;
+    if (Math.hypot(pos.x - e.pos.x, pos.z - e.pos.z) < e.r + r && Math.abs(pos.y - cy) < e.h / 2 + r) {
+      if (onceSet) onceSet.add(e);
+      hitEnemy(e, dmg, vel); return true;
+    }
+  }
+  return false;
+}
+function defeatEnemy(e, counted) {
+  e.state = 'dying'; e.k = 0;
+  const c = e.pos.clone(); c.y += e.h * 0.5;
+  const n = e.boss ? 60 : 18;
+  for (let i = 0; i < n; i++) spark(c, [0xff5a7a, 0xffd34d, 0x4cb7ff, 0x5fcf7a, 0xb79cff, 0xffffff][i % 6], new V3(rnd(-1, 1), rnd(0.3, 1.5), rnd(-1, 1)).multiplyScalar(e.boss ? 4 : 2.4), rnd(0.5, 0.9), e.boss ? 0.08 : 0.05);
+  for (let i = 0; i < (e.boss ? 10 : 4); i++) spawnBubble(i % 2 === 0, c.clone().add(new V3(rnd(-0.3, 0.3), rnd(0, 0.3), rnd(-0.3, 0.3))), new V3(rnd(-1, 1), rnd(0.6, 1.4), rnd(-1, 1)));
+  sfx.enemyPop();
+  if (!counted) return;
+  battle.defeated++;
+  if (e.boss) {
+    battle.bossWins++; battle.sinceBoss = 0;
+    document.getElementById('bossBar').hidden = true;
+    showBanner('You beat King Grumblob!'); sfx.fanfare(true);
+    for (let i = 0; i < 3; i++) dropSnack(e.pos);
+    enemies.forEach(o => { if (o !== e && o.state !== 'dying') defeatEnemy(o, false); });
+  } else {
+    battle.sinceBoss++;
+    if (Math.random() < 0.35) dropSnack(e.pos);
+    if (battle.sinceBoss >= BOSS_AFTER && !battle.bossDue && !enemies.some(o => o.boss && o.state !== 'dying')) {
+      battle.bossDue = true; battle.spawnT = Math.min(battle.spawnT, 3);
+      showBanner('Uh oh… something BIG is coming!'); sfx.fanfare(false);
+    }
+  }
+  renderBattle();
+}
+function dropSnack(at) {
+  const foods = SHOP.find(t => t.tab === 'Food').items;
+  const item = foods[Math.floor(rnd(0, foods.length))];
+  const obj = item.make();
+  obj.position.set(at.x + rnd(-0.3, 0.3), 0.4, at.z + rnd(-0.3, 0.3));
+  scene.add(obj);
+  const p = registerProp(obj);
+  Object.assign(p, { food: true, foodColor: obj.userData.food, foodName: item.name, asleep: false, grounded: false });
+  p.vel.set(rnd(-1.5, 1.5), 4, rnd(-1.5, 1.5));
+}
+function hurtPlayer(fromX, fromZ) {
+  if (battle.invuln > 0 || player.ko > 0) return;
+  battle.hearts = Math.max(0, battle.hearts - 1);
+  battle.invuln = 2.2;
+  const dx = player.pos.x - fromX, dz = player.pos.z - fromZ, d = Math.hypot(dx, dz) || 1;
+  player.vel.x += dx / d * 6; player.vel.z += dz / d * 6; player.vy = 5; player.grounded = false;
+  player.squashV += 8;
+  if (held) dropHeld();
+  sfx.ouch();
+  yumLabel(['Ouch!', 'Hey!', 'Eep!', 'Rude!'][Math.floor(rnd(0, 4))], null, '#ff5a7a');
+  if (battle.hearts <= 0) {
+    player.ko = 2.6; sfx.ko();
+    showBanner('Bonked! Back in a sec…');
+  }
+  renderBattle();
+}
+function showBanner(text) {
+  const b = document.getElementById('banner');
+  b.hidden = false; b.textContent = text;
+  b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+  clearTimeout(showBanner.t); showBanner.t = setTimeout(() => { b.hidden = true; }, 2600);
+}
+const HEART = (full) => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.8 8.2 3 4.5 6.6 4.5c2.1 0 3.6 1.2 5.4 3.2 1.8-2 3.3-3.2 5.4-3.2 3.6 0 5.8 3.7 4.2 7.3C19.5 16.4 12 21 12 21z" fill="${full ? '#ff5a8a' : '#f3dce7'}" stroke="${full ? '#e2336c' : '#e6c3d4'}" stroke-width="1.5"/></svg>`;
+function renderBattle() {
+  const on = battle.on;
+  document.getElementById('hearts').hidden = !on;
+  document.getElementById('hearts').innerHTML = on ? Array.from({ length: battle.maxHearts }, (_, i) => HEART(i < battle.hearts)).join('') : '';
+  document.getElementById('hearts').setAttribute('aria-label', `${battle.hearts} of ${battle.maxHearts} hearts`);
+  const boss = enemies.find(e => e.boss && e.state !== 'dying');
+  document.getElementById('battleInfo').textContent = !on ? '' : boss ? `Monsters popped: ${battle.defeated}`
+    : battle.bossDue ? `Monsters popped: ${battle.defeated} · Boss incoming!` : `Monsters popped: ${battle.defeated} · Boss in ${BOSS_AFTER - battle.sinceBoss}`;
+  document.getElementById('battleHud').hidden = !on;
+  document.getElementById('bossBar').hidden = !(on && boss);
+  if (boss) document.getElementById('bossFill').style.width = `${Math.max(0, boss.hp / boss.maxHp) * 100}%`;
+}
+// Play mode (no monsters, just explore and decorate) vs Game mode (monsters appear)
+const MODE_ICONS = {
+  play: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M12 18s-3-1.8-3-3.6a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.8-3 3.6-3 3.6z" fill="currentColor"/></svg>',
+  game: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5.4 1.8L15 14H9l-1.6 1.8A3 3 0 0 1 2 14v-2a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".6" fill="currentColor"/><circle cx="18" cy="13" r=".6" fill="currentColor"/></svg>',
+};
+function setMode(game, announce = true) {
+  battle.on = game;
+  const btn = document.getElementById('modeBtn');
+  btn.dataset.mode = game ? 'game' : 'play';
+  document.getElementById('modeIcon').innerHTML = MODE_ICONS[game ? 'game' : 'play'];
+  document.getElementById('modeLabel').textContent = game ? 'GAME' : 'PLAY';
+  btn.setAttribute('aria-label', game ? 'Game mode is on. Switch to Play mode' : 'Play mode is on. Switch to Game mode');
+  btn.title = game ? 'Game mode: monsters appear. Click for Play mode' : 'Play mode: no monsters. Click for Game mode';
+  if (!game) {
+    enemies.forEach(e => { if (e.state !== 'dying') defeatEnemy(e, false); });
+    waves.forEach(w => scene.remove(w.m)); waves.length = 0;
+    battle.bossDue = battle.sinceBoss >= BOSS_AFTER;
+    player.ko = 0; battle.invuln = 0;
+    if (announce) { showBanner('Play mode: explore and decorate'); sfx.holo(false); }
+  } else {
+    battle.spawnT = 2.5; battle.hearts = battle.maxHearts;
+    if (announce) { showBanner('Game mode: monsters incoming!'); sfx.fanfare(false); }
+  }
+  renderBattle();
+  try { localStorage.setItem('kiboroni-mode', game ? 'game' : 'play'); } catch (_) {}
+}
+document.getElementById('modeBtn').addEventListener('click', () => setMode(!battle.on));
+addEventListener('keydown', e => { if (e.code === 'KeyP' && !e.repeat && shopEl.hidden && !holo.open) setMode(!battle.on); });
+
+// collapsible tips box (starts collapsed on touch screens)
+{
+  const help = document.getElementById('help'), show = document.getElementById('helpShow');
+  let hidden = matchMedia('(pointer: coarse)').matches;
+  try { const v = localStorage.getItem('kiboroni-tips'); if (v) hidden = v === 'hidden'; } catch (_) {}
+  const apply = () => { help.hidden = hidden; show.hidden = !hidden; try { localStorage.setItem('kiboroni-tips', hidden ? 'hidden' : 'shown'); } catch (_) {} };
+  document.getElementById('helpHide').addEventListener('click', () => { hidden = true; apply(); });
+  show.addEventListener('click', () => { hidden = false; apply(); });
+  apply();
+}
+
+// boss slam shockwave + dizzy stars
+const waveMat = new THREE.MeshBasicMaterial({ color: 0xb79cff, transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide });
+const waves = [];
+function shockwave(at) {
+  const m = new THREE.Mesh(new THREE.RingGeometry(0.85, 1, 48), waveMat.clone()); m.rotation.x = -Math.PI / 2; m.position.set(at.x, 0.05, at.z); scene.add(m);
+  waves.push({ m, t: 0, hit: false });
+  battle.shake = 1; sfx.slam();
+}
+const dizzy = new THREE.Group();
+{
+  const star = new THREE.Shape();
+  for (let i = 0; i < 10; i++) { const r = i % 2 ? 0.035 : 0.08, a = i / 10 * Math.PI * 2 + Math.PI / 2; star[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+  const sg = new THREE.ExtrudeGeometry(star, { depth: 0.02, bevelEnabled: false });
+  for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ color: 0xffd34d })); dizzy.add(m); }
+  dizzy.visible = false; scene.add(dizzy);
+}
+
+{ // start in the last-used mode (Play mode the first time)
+  let m = 'play'; try { m = localStorage.getItem('kiboroni-mode') || 'play'; } catch (_) {}
+  setMode(m === 'game', false);
+}
+const pupilLook = new V3();
+function updateBattle(dt, t) {
+  // invulnerability blink + knock-out
+  battle.invuln = Math.max(0, battle.invuln - dt);
+  kibo.root.visible = !(battle.invuln > 0 && player.ko <= 0 && Math.floor(t * 14) % 2 === 0);
+  dizzy.visible = player.ko > 0;
+  if (player.ko > 0) {
+    player.ko -= dt;
+    dizzy.position.set(player.pos.x, player.pos.y + HEAD * 0.7, player.pos.z);
+    dizzy.children.forEach((s, i) => { const a = t * 4 + i * 2.09; s.position.set(Math.cos(a) * 0.32, Math.sin(t * 6 + i) * 0.04, Math.sin(a) * 0.32); s.rotation.y = t * 3; });
+    if (player.ko <= 0) {
+      battle.hearts = battle.maxHearts; battle.invuln = 2.5;
+      enemies.forEach(e => { if (e.state !== 'dying') defeatEnemy(e, false); });
+      battle.bossDue = battle.bossDue || battle.sinceBoss >= BOSS_AFTER;
+      battle.spawnT = 3;
+      showBanner('Back on your fins!'); renderBattle();
+    }
+  }
+  for (let i = waves.length - 1; i >= 0; i--) {
+    const w = waves[i]; w.t += dt / 0.55;
+    const R = 0.5 + w.t * 3.3; w.m.scale.setScalar(R); w.m.material.opacity = 0.6 * (1 - w.t);
+    const d = Math.hypot(player.pos.x - w.m.position.x, player.pos.z - w.m.position.z);
+    if (!w.hit && player.grounded && Math.abs(d - R) < 0.4) { w.hit = true; hurtPlayer(w.m.position.x, w.m.position.z); }
+    if (w.t >= 1) { scene.remove(w.m); w.m.material.dispose(); waves.splice(i, 1); }
+  }
+  const paused = holo.open || !shopEl.hidden || !!placing;
+  // spawning
+  if (battle.on && !paused && player.ko <= 0) {
+    battle.spawnT -= dt;
+    const bossAlive = enemies.some(e => e.boss && e.state !== 'dying');
+    const normal = enemies.filter(e => !e.boss && e.state !== 'dying').length;
+    if (battle.spawnT <= 0) {
+      if (battle.bossDue && !bossAlive) {
+        if (spawnEnemy('boss')) { battle.bossDue = false; showBanner('King Grumblob has arrived!'); }
+        battle.spawnT = rnd(9, 13);
+      } else {
+        const max = bossAlive ? 2 : Math.min(5, 3 + Math.floor(battle.defeated / 6));
+        if (normal < max) { const r = Math.random(); spawnEnemy(r < 0.4 ? 'bunny' : r < 0.75 ? 'blob' : 'sock'); }
+        battle.spawnT = bossAlive ? rnd(9, 13) : rnd(4, 7.5);
+      }
+      renderBattle();
+    }
+  }
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    e.flash = Math.max(0, e.flash - dt * 4);
+    e.mats.forEach(m => { m.emissive?.setRGB(e.flash, e.flash, e.flash); });
+    if (e.state === 'dying') {
+      e.k += dt / 0.3;
+      e.root.scale.setScalar(e.baseScale * Math.max(0.001, 1 + e.k * 0.4) * (1 - e.k));
+      e.root.rotation.y += dt * 20;
+      if (e.k >= 1) { scene.remove(e.root); e.root.traverse(o => { if (o.isMesh) o.material.dispose(); }); enemies.splice(i, 1); }
+      continue;
+    }
+    if (e.state === 'spawn') {
+      e.k = Math.min(1, e.k + dt / 0.45);
+      const k = 1 + 2.2 * Math.pow(e.k - 1, 3) + 1.2 * Math.pow(e.k - 1, 2);
+      e.root.scale.setScalar(e.baseScale * Math.max(0.001, k));
+      if (e.k >= 1) e.state = 'chase';
+    }
+    if (paused) continue;
+    e.t += dt;
+    e.hitCool = Math.max(0, e.hitCool - dt);
+    const dx = player.pos.x - e.pos.x, dz = player.pos.z - e.pos.z, dist = Math.hypot(dx, dz) || 1;
+    const nx = dx / dist, nz = dz / dist;
+    let wx = 0, wz = 0, hop = 0;
+    const cheering = player.ko > 0 || !battle.on;
+    e.retreat = Math.max(0, (e.retreat || 0) - dt);
+    if (e.state === 'chase' && !cheering && e.retreat > 0) {
+      wx = -nx * e.speed * 0.6; wz = -nz * e.speed * 0.6; // backs off, giggling
+      hop = Math.abs(Math.sin(e.t * 12)) * 0.12;
+    } else if (e.state === 'chase' && !cheering) {
+      if (e.kind === 'bunny') {
+        const zig = Math.sin(e.t * 9 + e.seed) * 1.6;
+        wx = nx * e.speed - nz * zig; wz = nz * e.speed + nx * zig;
+        hop = Math.abs(Math.sin(e.t * 16)) * 0.05;
+      } else if (e.kind === 'blob') {
+        const ph = (e.t * 1.6 + e.seed) % 1;
+        if (ph < 0.55) { wx = nx * e.speed; wz = nz * e.speed; hop = Math.sin(ph / 0.55 * Math.PI) * 0.32; }
+      } else if (e.kind === 'sock') {
+        const ph = (e.t * 2.3) % 1; hop = Math.sin(ph * Math.PI) * 0.2;
+        wx = nx * e.speed; wz = nz * e.speed;
+        e.body.rotation.z = Math.sin(e.t * 11) * 0.18;
+      } else if (e.boss) {
+        e.jumpT -= dt;
+        if (e.jump) {
+          e.jump.t += dt / 0.9;
+          hop = Math.sin(Math.min(1, e.jump.t) * Math.PI) * 1.7;
+          wx = e.jump.vx; wz = e.jump.vz;
+          if (e.jump.t >= 1) { e.jump = null; e.jumpT = rnd(4, 6); shockwave(e.pos); }
+        } else if (e.jumpT <= 0) {
+          const sp = Math.min(dist / 0.9, 5);
+          e.jump = { t: 0, vx: nx * sp, vz: nz * sp };
+          yumLabel(['Ho ho!', 'BOING!', 'Royal bounce!'][Math.floor(rnd(0, 3))], e.pos.clone().add(new V3(0, e.h + 0.4, 0)), '#8a5cf0');
+        } else {
+          const ph = (e.t * 1.1) % 1; hop = Math.sin(ph * Math.PI) * 0.15;
+          wx = nx * e.speed; wz = nz * e.speed;
+        }
+      }
+    } else if (cheering) {
+      hop = Math.abs(Math.sin(e.t * 8 + e.seed)) * 0.25; // happy little dance
+    }
+    const acc = e.jump ? 1 : Math.min(1, dt * 8);
+    e.vel.x += (wx - e.vel.x) * acc; e.vel.z += (wz - e.vel.z) * acc;
+    tmpP.x = e.pos.x + e.vel.x * dt; tmpP.z = e.pos.z + e.vel.z * dt;
+    resolveCircle(tmpP, e.r, 0, Math.min(e.h, 0.8));
+    // keep monsters apart
+    for (const o of enemies) {
+      if (o === e || o.state === 'dying') continue;
+      const ox = tmpP.x - o.pos.x, oz = tmpP.z - o.pos.z, od = Math.hypot(ox, oz), md = e.r + o.r;
+      if (od < md && od > 1e-4) { tmpP.x += ox / od * (md - od) * 0.5; tmpP.z += oz / od * (md - od) * 0.5; }
+    }
+    e.pos.x = clamp(tmpP.x, HOUSE.x1 + 0.2 + e.r, HOUSE.x2 - 0.2 - e.r); e.pos.z = clamp(tmpP.z, HOUSE.z1 + 0.2 + e.r, HOUSE.z2 - 0.2 - e.r);
+    e.hopY = hop; e.pos.y = hop;
+    const sp = Math.hypot(e.vel.x, e.vel.z);
+    if (sp > 0.3) e.yaw = lerpAngle(e.yaw, Math.atan2(e.vel.x, e.vel.z), Math.min(1, dt * 8));
+    else e.yaw = lerpAngle(e.yaw, Math.atan2(nx, nz), Math.min(1, dt * 4));
+    e.root.position.copy(e.pos); e.root.rotation.y = e.yaw;
+    if (e.state === 'chase') { const sq = e.kind === 'blob' || e.boss ? Math.max(0, 0.12 - hop) : 0; e.body.scale.set(1 + sq, 1 - sq, 1 + sq); }
+    // googly eyes follow Kiboroni and jiggle
+    e.pupils.forEach((p, k) => {
+      p.parent.worldToLocal(pupilLook.set(player.pos.x, player.pos.y + 0.3, player.pos.z));
+      pupilLook.z = 0; pupilLook.clampLength(0, 0.025 / e.baseScale);
+      p.position.x = pupilLook.x + Math.sin(e.t * 25 + k) * 0.004; p.position.y = pupilLook.y * 0.6 + Math.cos(e.t * 23 + k) * 0.004;
+    });
+    if (e.state !== 'chase' || cheering) continue;
+    // thrown or knocked objects bonk monsters
+    for (const p of props) {
+      if (p.held || p.asleep || p.food) continue;
+      const ps = Math.hypot(p.vel.x, p.vel.y, p.vel.z);
+      if (ps < 3 || (p.bonkT || 0) > t) continue;
+      const o = p.obj.position, cy = o.y - p.base + p.h / 2;
+      if (Math.hypot(o.x - e.pos.x, o.z - e.pos.z) < p.r + e.r && Math.abs(cy - (e.pos.y + e.h / 2)) < p.h / 2 + e.h / 2) {
+        p.bonkT = t + 0.5; hitEnemy(e, p.heavy ? 3 : 1, p.vel); p.vel.multiplyScalar(-0.3);
+      }
+    }
+    if (e.state === 'dying') continue;
+    // touching Kiboroni: stomp from above, or a bonk for him
+    const pd = Math.hypot(player.pos.x - e.pos.x, player.pos.z - e.pos.z);
+    if (pd < e.r + player.r * 0.9 && player.pos.y < e.pos.y + e.h && player.pos.y + player.h > e.pos.y) {
+      if (player.vy < 0 && player.pos.y > e.pos.y + e.h * 0.5) {
+        hitEnemy(e, e.boss ? 2 : 3, null);
+        player.vy = 7.5; player.grounded = false; player.squashV -= 6;
+        sfx.boing(); yumLabel('Boing!');
+      } else if (powers.has('shield')) {
+        if (e.hitCool <= 0) { e.vel.x -= nx * 7; e.vel.z -= nz * 7; e.hitCool = 0.4; sfx.tick(0.1); }
+      } else {
+        hurtPlayer(e.pos.x, e.pos.z);
+        enemies.forEach(o => { if (!o.boss && Math.hypot(o.pos.x - player.pos.x, o.pos.z - player.pos.z) < 3) o.retreat = 1.6; });
+        e.vel.x -= nx * 3; e.vel.z -= nz * 3;
+        if (Math.random() < 0.6) yumLabel(['Hehe!', 'Gotcha!', 'Tag!', 'Boop!'][Math.floor(rnd(0, 4))], e.pos.clone().add(new V3(0, e.h + 0.2, 0)), '#8a5cf0');
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -2364,6 +2839,7 @@ function updateGums(dt) {
         sfx.tick(g.r);
       }
     }
+    if (hitEnemiesAt(m.position, g.r, 1, g.vel)) { scene.remove(m); gums.splice(i, 1); continue; }
     if (g.age > 6) { const k = (g.age - 6) / 0.4; m.scale.setScalar(g.r * Math.max(0.01, 1 - k)); if (k >= 1) { scene.remove(m); gums.splice(i, 1); } }
   }
 }
@@ -2414,6 +2890,7 @@ function updateBoomerang(dt) {
       b.hit.add(p); knock(p, b.vel, 0.45); sfx.tick(0.12);
     }
   }
+  hitEnemiesAt(m.position, 0.28, 2, b.vel, b.hit);
   b.whoosh -= dt; if (b.whoosh <= 0) { b.whoosh = 0.22; sfx.whoosh(0.05); }
 }
 function updateWeapons(dt) {
@@ -2505,6 +2982,10 @@ function updateCamera(dt) {
     cam.target.y + Math.sin(cam.pitch) * cam.dist,
     cam.target.z + Math.cos(cam.yaw) * cp * cam.dist);
   camera.lookAt(cam.target);
+  if (battle.shake > 0) { // boss landing wobble
+    battle.shake = Math.max(0, battle.shake - dt * 1.5);
+    camera.position.x += (Math.random() - 0.5) * battle.shake * 0.4; camera.position.y += (Math.random() - 0.5) * battle.shake * 0.4;
+  }
 
   // dollhouse cutaway: lower walls the camera is behind, or that block the view
   const toTarget = cam.target.distanceTo(camera.position);
@@ -2542,6 +3023,7 @@ function frame() {
   updatePlaced(dt);
   updateWings(t);
   updateEating(dt);
+  updateBattle(dt, t);
   updateWeapons(dt);
   clouds.forEach((c, i) => { c.position.x += dt * 0.3; if (c.position.x > 55) c.position.x = -55; c.position.y += Math.sin(t * 0.3 + i) * 0.002; });
   renderer.render(scene, camera);
@@ -2557,7 +3039,7 @@ addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
-window.__kibo = { player, cam, walls, colliders, camera, mouse, V3, audio, bubbles, props, grabOrDrop, getHeld: () => held, SHOP, startPlacing, commitPlacing, getPlacing: () => placing, holo, powers, toggleHolo, togglePower, setCharacter, placed, removePlaced, kibo, heavies, equipWeapon, gums, getBoom: () => boom, colliders, getSnacks: () => snacksEaten };
+window.__kibo = { player, cam, walls, colliders, camera, mouse, V3, audio, bubbles, props, grabOrDrop, getHeld: () => held, SHOP, startPlacing, commitPlacing, getPlacing: () => placing, holo, powers, toggleHolo, togglePower, setCharacter, placed, removePlaced, kibo, heavies, equipWeapon, gums, getBoom: () => boom, colliders, getSnacks: () => snacksEaten, battle, enemies, spawnEnemy, hitEnemy };
 </script>
 </body>
 </html>
