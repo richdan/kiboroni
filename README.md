@@ -1,5 +1,7 @@
 # Kiboroni
 
+_by Kibi Otfin Studios_
+
 A cosy 3D web game prototype built with [Three.js](https://threejs.org). Kiboroni, a little pink pufferfish, explores a four-room house, blowing bubbles, climbing furniture, carrying objects, decorating and snacking from the shop, and using the gem on its necklace to power up or transform. In Game mode, cute monsters (and King Grumblob) chase Kiboroni around the house.
 
 ## Play

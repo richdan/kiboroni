@@ -10,6 +10,8 @@
   html, body { margin: 0; height: 100%; overflow: hidden; background: #9fd8ff; font-family: 'Fredoka', system-ui, sans-serif; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
   canvas { display: block; touch-action: none; }
   #hud { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); left: calc(16px + env(safe-area-inset-left, 0px)); right: calc(272px + env(safe-area-inset-right, 0px)); color: #fff; pointer-events: none; text-shadow: 0 2px 0 rgba(200,60,120,.45), 0 4px 12px rgba(0,0,0,.15); }
+  #hud h1 .byline { font-size: 15px; font-weight: 600; letter-spacing: .3px; color: #fff; -webkit-text-stroke: 0; text-shadow: 0 1px 0 rgba(200,60,120,.6), 0 2px 8px rgba(160,40,100,.35); white-space: nowrap; }
+  #loading .byline { font-size: 16px; font-weight: 600; color: #c2407e; text-align: center; margin-top: 6px; }
   #hud h1 { margin: 0; font-size: 40px; font-weight: 700; letter-spacing: .5px; color: #ff6fae; -webkit-text-stroke: 2px #fff; paint-order: stroke fill; }
   #help { position: relative; padding-right: 34px !important; width: fit-content; max-width: 100%; box-sizing: border-box; margin-top: 6px; background: rgba(255,255,255,.82); color: #7a3d5c; text-shadow: none; padding: 8px 12px; border-radius: 14px; font-size: 14px; line-height: 1.5; box-shadow: 0 4px 14px rgba(120,40,90,.15); }
   #help b { color: #ff4f9a; }
@@ -40,7 +42,8 @@
   #helpHide:focus-visible, #helpShow:focus-visible, #modeBtn:focus-visible { outline: 3px solid #4cb7ff; outline-offset: 2px; }
   @media (pointer: coarse) {
     #hud { right: calc(244px + env(safe-area-inset-right, 0px)); }
-    #hud h1 { font-size: 30px; }
+    #hud h1 { font-size: 30px; line-height: 1.05; }
+    #hud h1 .byline { display: block; font-size: 12px; }
     html #mute { width: 46px; height: 46px; top: calc(13px + env(safe-area-inset-top, 0px)); }
     html #shopBtn, html #gemBtn, html #modeBtn { width: 48px; height: 48px; }
     html #shopBtn { right: calc(68px + env(safe-area-inset-right, 0px)); }
@@ -128,9 +131,9 @@
 </script>
 </head>
 <body>
-<div id="loading">Loading Kiboroni…</div>
+<div id="loading"><div>Loading Kiboroni…<div class="byline">by Kibi Otfin Studios</div></div></div>
 <div id="hud">
-  <h1>Kiboroni</h1>
+  <h1>Kiboroni <span class="byline">by Kibi Otfin Studios</span></h1>
   <button id="helpShow" hidden aria-label="Show tips">?</button>
   <div id="help">
     <button id="helpHide" aria-label="Hide tips" title="Hide tips">✕</button>
