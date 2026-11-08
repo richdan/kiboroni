@@ -1,6 +1,6 @@
 # Kiboroni
 
-A cosy 3D web game prototype built with [Three.js](https://threejs.org). Kiboroni, a little pink pufferfish, explores a four-room house, blowing bubbles, climbing furniture and carrying objects around.
+A cosy 3D web game prototype built with [Three.js](https://threejs.org). Kiboroni, a little pink pufferfish, explores a four-room house, blowing bubbles, climbing furniture, carrying objects, decorating from the shop, and using the gem on its necklace to power up or transform.
 
 ## Play
 
@@ -22,4 +22,7 @@ Then visit http://localhost:8123.
 | Pick up | Click an object | F | Tap an object, or GRAB |
 | Put down / toss | Click Kiboroni | F | Tap Kiboroni, or GRAB |
 | Camera | Right-drag, scroll to zoom | Q / E | Drag, pinch to zoom |
+| Gem screen (power-ups, transform) | Blue gem button | G | Blue gem button |
+| Add furniture / toys | Shop button, then click to place | R rotate, Esc cancel | Shop button, drag, then Place |
+| Remove an added item | Trash button above it | | Trash button above it |
 | Mute | Speaker button | M | Speaker button |
