@@ -9,7 +9,7 @@
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #9fd8ff; font-family: 'Fredoka', system-ui, sans-serif; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
   canvas { display: block; touch-action: none; }
-  #hud { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); left: calc(16px + env(safe-area-inset-left, 0px)); right: calc(80px + env(safe-area-inset-right, 0px)); color: #fff; pointer-events: none; text-shadow: 0 2px 0 rgba(200,60,120,.45), 0 4px 12px rgba(0,0,0,.15); }
+  #hud { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); left: calc(16px + env(safe-area-inset-left, 0px)); right: calc(208px + env(safe-area-inset-right, 0px)); color: #fff; pointer-events: none; text-shadow: 0 2px 0 rgba(200,60,120,.45), 0 4px 12px rgba(0,0,0,.15); }
   #hud h1 { margin: 0; font-size: 40px; font-weight: 700; letter-spacing: .5px; color: #ff6fae; -webkit-text-stroke: 2px #fff; paint-order: stroke fill; }
   #help { width: fit-content; max-width: 100%; box-sizing: border-box; margin-top: 6px; background: rgba(255,255,255,.82); color: #7a3d5c; text-shadow: none; padding: 8px 12px; border-radius: 14px; font-size: 14px; line-height: 1.5; box-shadow: 0 4px 14px rgba(120,40,90,.15); }
   #help b { color: #ff4f9a; }
@@ -19,6 +19,66 @@
   #jump { position: fixed; right: calc(24px + env(safe-area-inset-right, 0px)); bottom: calc(36px + env(safe-area-inset-bottom, 0px)); width: 84px; height: 84px; border-radius: 50%; background: #ff86bf; border: 4px solid #fff; color: #fff; font: 700 18px 'Fredoka', sans-serif; display: none; touch-action: none; }
   #grab { position: fixed; right: calc(120px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 70px; height: 70px; border-radius: 50%; background: #8fd3ff; border: 4px solid #fff; color: #fff; font: 700 15px 'Fredoka', sans-serif; display: none; touch-action: none; }
   #mute { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); width: 48px; height: 48px; border-radius: 50%; border: 3px solid #fff; background: #ff86bf; font-size: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(120,40,90,.2); }
+  [hidden] { display: none !important; }
+  #shopBtn { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(76px + env(safe-area-inset-right, 0px)); width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; background: #ffb13d; color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgba(120,40,90,.25); transition: transform .15s; }
+  #shopBtn:hover { transform: scale(1.08) rotate(-4deg); }
+  #shopBtn:focus-visible, #mute:focus-visible, #shop button:focus-visible, #placeBar button:focus-visible { outline: 3px solid #4cb7ff; outline-offset: 2px; }
+  #shop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(90,30,70,.28); backdrop-filter: blur(3px); padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-sizing: border-box; }
+  .shop-panel { width: min(760px, 100%); max-height: 100%; display: flex; flex-direction: column; background: #fff7fb; border: 4px solid #fff; border-radius: 28px; box-shadow: 0 18px 50px rgba(120,40,90,.3); overflow: hidden; animation: shopIn .22s ease-out; }
+  @keyframes shopIn { from { transform: translateY(14px) scale(.97); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .shop-panel { animation: none; } #shopBtn { transition: none; } }
+  .shop-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 8px; }
+  .shop-head h2 { margin: 0; font-size: 28px; color: #ff4f9a; letter-spacing: .3px; text-wrap: balance; }
+  #shopClose { width: 40px; height: 40px; flex: none; border-radius: 50%; border: none; background: #ffe1ef; color: #c2407e; font: 700 18px 'Fredoka', sans-serif; cursor: pointer; }
+  .shop-tabs { display: flex; gap: 8px; padding: 4px 20px 12px; overflow-x: auto; scrollbar-width: none; }
+  .shop-tabs button { flex: none; border: none; border-radius: 999px; padding: 8px 16px; background: #ffe1ef; color: #b04a7d; font: 600 15px 'Fredoka', sans-serif; cursor: pointer; }
+  .shop-tabs button[aria-selected="true"] { background: #ff6fae; color: #fff; }
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 12px; padding: 4px 20px 20px; overflow-y: auto; }
+  .shop-grid button { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 8px 10px; border: 3px solid #ffe1ef; border-radius: 20px; background: #fff; cursor: pointer; font-family: 'Fredoka', sans-serif; text-align: left; transition: transform .12s, border-color .12s; }
+  .shop-grid button:hover { border-color: #ff86bf; transform: translateY(-2px); }
+  .shop-grid img { width: 100%; aspect-ratio: 1; border-radius: 14px; background: radial-gradient(circle at 50% 40%, #ffffff, #ffeaf3 60%, #e6f5ff); display: block; }
+  .shop-grid .nm { font-size: 15px; font-weight: 600; color: #7a3d5c; padding: 0 4px; }
+  .shop-grid .kd { font-size: 12px; color: #c27aa0; padding: 0 4px; letter-spacing: .3px; text-transform: uppercase; }
+  #placeBar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 15; background: rgba(255,255,255,.95); border: 3px solid #fff; border-radius: 22px; padding: 10px 12px; box-shadow: 0 8px 24px rgba(120,40,90,.25); max-width: calc(100% - 32px); box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .pb-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+  #placeName { font-weight: 700; color: #ff4f9a; padding: 0 6px; }
+  #placeBar button { border: none; border-radius: 999px; padding: 8px 16px; background: #ffe1ef; color: #b04a7d; font: 600 15px 'Fredoka', sans-serif; cursor: pointer; }
+  #placeBar button.ok { background: #5fcf7a; color: #fff; }
+  #placeBar button.ok:disabled { background: #d9c9d2; cursor: not-allowed; }
+  .pb-hint { font-size: 12px; color: #a0668a; text-align: center; }
+  #gemBtn { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(140px + env(safe-area-inset-right, 0px)); width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; background: #3da8ff; color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgba(40,90,160,.3); transition: transform .15s, box-shadow .2s; }
+  #gemBtn:hover { transform: scale(1.08) rotate(4deg); }
+  #gemBtn.on { box-shadow: 0 0 0 4px rgba(120,210,255,.6), 0 0 22px #6fd0ff; }
+  #gemBtn:focus-visible { outline: 3px solid #ff6fae; outline-offset: 2px; }
+  #powerChips { position: fixed; top: calc(78px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; align-items: flex-end; gap: 6px; pointer-events: none; }
+  #powerChips span { background: rgba(61,168,255,.92); color: #fff; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 2px solid #fff; box-shadow: 0 0 10px rgba(80,180,255,.6); }
+  #holo { position: fixed; inset: 0; z-index: 18; display: flex; justify-content: center; align-items: flex-start; padding: calc(76px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); box-sizing: border-box; }
+  .holo-panel { position: relative; width: min(660px, 100%); max-height: 52%; display: flex; flex-direction: column; color: #e8f8ff; background: linear-gradient(180deg, rgba(70,170,255,.42), rgba(30,110,240,.34)); border: 2px solid rgba(160,230,255,.95); border-radius: 22px; box-shadow: 0 0 26px rgba(80,180,255,.75), inset 0 0 34px rgba(120,210,255,.35); backdrop-filter: blur(5px); overflow: hidden; transform-origin: 50% 100%; animation: holoIn .42s ease-out; }
+  .holo-panel::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 2px, transparent 2px 5px); }
+  @keyframes holoIn { 0% { transform: scale(.25, .02); opacity: 0; } 35% { transform: scale(1, .03); opacity: 1; } 50% { opacity: .45; } 60% { opacity: 1; } 100% { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .holo-panel { animation: none; } }
+  .holo-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px 6px; }
+  .holo-head h2 { margin: 0; font-size: 22px; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 10px #8fdcff; }
+  #holoClose { width: 36px; height: 36px; flex: none; border-radius: 50%; border: 2px solid rgba(200,240,255,.9); background: transparent; color: #fff; font: 700 16px 'Fredoka', sans-serif; cursor: pointer; }
+  .holo-tabs { display: flex; gap: 8px; padding: 2px 18px 10px; }
+  .holo-tabs button { border: 2px solid rgba(200,240,255,.8); border-radius: 999px; padding: 6px 16px; background: transparent; color: #e8f8ff; font: 600 15px 'Fredoka', sans-serif; letter-spacing: .5px; cursor: pointer; }
+  .holo-tabs button[aria-selected="true"] { background: #c8f0ff; color: #0b3a66; }
+  .holo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; padding: 4px 18px 10px; overflow-y: auto; position: relative; z-index: 1; }
+  .holo-grid button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px; border-radius: 16px; border: 1.5px solid rgba(170,230,255,.55); background: rgba(255,255,255,.1); color: #e8f8ff; font-family: 'Fredoka', sans-serif; text-align: left; cursor: pointer; transition: background .15s, box-shadow .15s; }
+  .holo-grid button:hover { background: rgba(255,255,255,.2); }
+  .holo-grid button.on { background: rgba(170,235,255,.38); border-color: #fff; box-shadow: 0 0 14px rgba(140,220,255,.9); }
+  .holo-grid .ic { width: 100%; height: 64px; display: grid; place-items: center; color: #fff; filter: drop-shadow(0 0 6px #7fd6ff); }
+  .holo-grid .ic img { height: 72px; width: auto; }
+  .holo-grid .nm { font-size: 15px; font-weight: 700; }
+  .holo-grid .ab { font-size: 12px; opacity: .85; line-height: 1.3; }
+  .holo-grid .st { font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.18); }
+  .holo-grid button.on .st { background: #fff; color: #0b6fd6; }
+  .holo-foot { font-size: 12px; text-align: center; padding: 4px 0 12px; opacity: .85; }
+  .holo-grid button:focus-visible, .holo-tabs button:focus-visible, #holoClose:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+  .trash { position: fixed; left: 0; top: 0; z-index: 12; width: 38px; height: 38px; border-radius: 50%; border: 3px solid #ff6f91; background: #fff; color: #ff4f7a; display: grid; place-items: center; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .15s, background .15s, color .15s; box-shadow: 0 4px 10px rgba(120,40,90,.25); }
+  .trash.show { opacity: 1; pointer-events: auto; }
+  .trash:hover, .trash:focus-visible { background: #ff6f91; color: #fff; outline: none; }
+  @media (pointer: coarse) { #placeBar { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); } }
   @media (pointer: coarse) { #joy, #jump, #grab { display: block; } #help .desk { display: none; } }
   @media (pointer: fine) { #help .touch { display: none; } }
 </style>
@@ -34,14 +94,56 @@
 <div id="hud">
   <h1>Kiboroni</h1>
   <div id="help">
-    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kiboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>M</b> mute</span>
-    <span class="touch"><b>Tap</b> the floor to walk · <b>Tap</b> an object to pick it up · <b>Tap Kiboroni</b> to put it down<br><b>Drag</b> to turn camera · <b>Pinch</b> to zoom · or use the <b>stick</b>, <b>Jump</b> &amp; <b>Grab</b> buttons</span>
+    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kiboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>M</b> mute · <b>Shop</b> button to add things · <b>G</b> gem powers</span>
+    <span class="touch"><b>Tap</b> the floor to walk · <b>Tap</b> an object to pick it up · <b>Tap Kiboroni</b> to put it down<br><b>Drag</b> to turn camera · <b>Pinch</b> to zoom · or use the <b>stick</b>, <b>Jump</b> &amp; <b>Grab</b> buttons · <b>Shop</b> to add things · <b>Gem</b> for powers</span>
   </div>
 </div>
 <div id="joy"><div id="knob"></div></div>
 <button id="jump">JUMP</button>
 <button id="grab">GRAB</button>
 <button id="mute" title="Sound on/off (M)">🔊</button>
+<button id="shopBtn" title="Shop" aria-label="Open the shop">
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3.5 9 5 4h14l1.5 5"/><path d="M3.5 9a2.8 2.8 0 0 0 5.67 0 2.8 2.8 0 0 0 5.66 0 2.8 2.8 0 0 0 5.67 0"/><path d="M5 12v8h14v-8"/><path d="M10 20v-5h4v5"/>
+  </svg>
+</button>
+<div id="shop" hidden>
+  <div class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
+    <div class="shop-head">
+      <h2 id="shopTitle">Kiboroni's Shop</h2>
+      <button id="shopClose" aria-label="Close the shop">✕</button>
+    </div>
+    <div class="shop-tabs" role="tablist" id="shopTabs"></div>
+    <div class="shop-grid" id="shopGrid"></div>
+  </div>
+</div>
+<button id="gemBtn" title="Gem screen (G)" aria-label="Open the gem screen">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+    <path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6 3-6M12 21 9 9M12 21l3-12"/>
+  </svg>
+</button>
+<div id="powerChips" aria-live="polite"></div>
+<div id="holo" hidden>
+  <div class="holo-panel" role="dialog" aria-modal="true" aria-labelledby="holoTitle">
+    <div class="holo-head">
+      <h2 id="holoTitle">Gem Screen</h2>
+      <button id="holoClose" aria-label="Close the gem screen">✕</button>
+    </div>
+    <div class="holo-tabs" role="tablist" id="holoTabs"></div>
+    <div class="holo-grid" id="holoGrid"></div>
+    <div class="holo-foot">Press <b>G</b> to switch off the gem</div>
+  </div>
+</div>
+<div id="trashLayer"></div>
+<div id="placeBar" hidden>
+  <div class="pb-row">
+    <span id="placeName"></span>
+    <button id="placeRotate">Rotate</button>
+    <button id="placeOk" class="ok">Place</button>
+    <button id="placeCancel">Cancel</button>
+  </div>
+  <div class="pb-hint" id="placeHint">Move the pointer to position · Click to place · R or right-click to rotate · Esc to cancel</div>
+</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -606,6 +708,27 @@ function beanbag(color) {
   g.add(SPH(C(color), 0.4, 0.3, 0.3, 0, 0.55, -0.35, NS));
   return g;
 }
+function rugObj(rx, rz, tex) {
+  const g = new THREE.Group();
+  const m = M(new THREE.CircleGeometry(1, 48), new THREE.MeshStandardMaterial({ map: tex, roughness: 1 }), { solid: false, cast: false });
+  m.rotation.x = -Math.PI / 2; m.scale.set(rx, rz, 1); m.position.y = 0.006 + Math.random() * 0.004; g.add(m);
+  return g;
+}
+function cushion(color, button) {
+  const g = new THREE.Group();
+  g.add(SPH(C(color), 0.38, 0.13, 0.38, 0, 0.13, 0));
+  g.add(SPH(C(button), 0.05, 0.03, 0.05, 0, 0.255, 0, NS));
+  return g;
+}
+function pouf(color, band) {
+  const g = new THREE.Group();
+  g.add(RB(0.6, 0.42, 0.6, 0.2, C(color), 0, 0.21, 0));
+  const t = M(new THREE.TorusGeometry(0.29, 0.03, 8, 32), C(band), NS); t.rotation.x = Math.PI / 2; t.position.y = 0.21; g.add(t);
+  return g;
+}
+function ballObj() {
+  return M(new THREE.SphereGeometry(0.32, 32, 20), new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.45 }), NS);
+}
 function rug(x, z, rx, rz, tex) {
   const m = M(new THREE.CircleGeometry(1, 48), new THREE.MeshStandardMaterial({ map: tex, roughness: 1 }), { solid: false, cast: false });
   m.rotation.x = -Math.PI / 2; m.scale.set(rx, rz, 1); m.position.set(x, 0.008, z); scene.add(m);
@@ -675,18 +798,17 @@ place(block(0.9, 1.68, 0x8be38b, 0xffffff), 9.4, 5.3);
 place(block(0.5, 0.5, 0xb79cff, 0xffffff), 3.0, 2.2, 0.4).userData.pick = true;
 place(block(0.5, 0.5, 0xff9f5a, 0xffffff), 3.55, 2.0, -0.2).userData.pick = true;
 place(block(0.4, 0.4, 0x8be38b, 0xffd34d), 2.4, 3.4, 0.7).userData.pick = true;
-// rubber duck
-{
+function duck() {
   const g = new THREE.Group(), y = C(0xffd84a);
   g.add(SPH(y, 0.22, 0.17, 0.28, 0, 0.17, 0, NS));
   g.add(SPH(y, 0.13, 0.13, 0.13, 0, 0.38, 0.12, NS));
   g.add(SPH(C(0xff9f2a), 0.07, 0.035, 0.08, 0, 0.36, 0.25, NS));
   [-1, 1].forEach(s => g.add(SPH(C(0x2b0d14), 0.02, 0.025, 0.02, s * 0.06, 0.42, 0.22, NS)));
   g.add(SPH(y, 0.06, 0.06, 0.09, 0, 0.25, -0.26, NS));
-  place(g, 5.6, 2.6, -0.6).userData.pick = true;
+  return g;
 }
-// teddy bear
-{
+place(duck(), 5.6, 2.6, -0.6).userData.pick = true;
+function teddy() {
   const g = new THREE.Group(), b = C(0xd99a6b), lt = C(0xf5d0a8);
   g.add(SPH(b, 0.2, 0.22, 0.18, 0, 0.22, 0, NS));
   g.add(SPH(lt, 0.12, 0.13, 0.05, 0, 0.2, 0.14, NS));
@@ -699,8 +821,9 @@ place(block(0.4, 0.4, 0x8be38b, 0xffd34d), 2.4, 3.4, 0.7).userData.pick = true;
     g.add(SPH(C(0x2b0d14), 0.02, 0.025, 0.02, s * 0.055, 0.57, 0.135, NS));
   });
   g.add(SPH(C(0x2b0d14), 0.025, 0.02, 0.02, 0, 0.52, 0.18, NS));
-  place(g, 1.2, 5.6, 0.5).userData.pick = true;
+  return g;
 }
+place(teddy(), 1.2, 5.6, 0.5).userData.pick = true;
 place(toyChest(), 3.6, 6.45);
 place(beanbag(0xffa25a), 0.3, 3.0);
 place(plant(0.9), -0.4, 6.4).userData.pick = true;
@@ -777,9 +900,19 @@ function groundAt(x, z, y, r) {
 // ---------------------------------------------------------------------------
 // Kiboroni (the pink pufferfish)
 // ---------------------------------------------------------------------------
-function makeKiboroni() {
-  const sheen = (color, sc) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.78, sheen: 1, sheenRoughness: 0.45, sheenColor: new THREE.Color(sc) });
-  const pink = sheen(0xff84bd, 0xffd6ea), bellyM = sheen(0xffc0dc, 0xffffff), deep = sheen(0xff6eac, 0xffc0de);
+// Characters Kiboroni can transform into via the gem. ability: speed / jump multipliers, float = slow fall, push = shove harder
+const SKINS = {
+  kiboroni: { name: 'Kiboroni', about: 'The original pink puffer', body: 0xff84bd, sheen: 0xffd6ea, belly: 0xffc0dc, deep: 0xff6eac, lip: 0xff9ccb, blush: 0xff4f96, glow: 0xff5fa2, ability: {} },
+  spiky: { name: 'Spiky Puff', about: 'Soft spikes, shoves things harder', body: 0xffd24a, sheen: 0xfff3c4, belly: 0xfff1b8, deep: 0xffa53d, lip: 0xffb27a, blush: 0xff8a5a, glow: 0xff9f2a, extras: 'spikes', ability: { push: 1.8 } },
+  jelly: { name: 'Jelly', about: 'Always drifts down gently', body: 0xb79cff, sheen: 0xf0e8ff, belly: 0xe0d4ff, deep: 0x9b7dff, lip: 0xd9c9ff, blush: 0xff7fc8, glow: 0xb08cff, extras: 'jelly', translucent: true, noFeet: true, noFins: true, ability: { float: true } },
+  bunny: { name: 'Bunny Puff', about: 'Springy, bouncy jumps', body: 0xfff4f8, sheen: 0xffffff, belly: 0xffdbe9, deep: 0xffb8d4, lip: 0xffb3cf, blush: 0xff8fbf, glow: 0xff86bf, extras: 'bunny', noFins: true, ability: { jump: 1.2 } },
+  robo: { name: 'Robo Puff', about: 'Zippy and fast', body: 0xa9bfd4, sheen: 0xeef5fc, belly: 0xdde7f1, deep: 0x6f88a3, lip: 0xc0cfdd, blush: 0x6fd3ff, glow: 0x4cd0ff, extras: 'robo', metal: true, ability: { speed: 1.35 } },
+  froggo: { name: 'Froggo', about: 'Huge froggy leaps', body: 0x7fd96a, sheen: 0xe6ffd6, belly: 0xeaffcf, deep: 0x4fb957, lip: 0xa6e88f, blush: 0xff8fa8, glow: 0x5fcf7a, extras: 'frog', ability: { jump: 1.4 } },
+};
+function makeKiboroni(skin = SKINS.kiboroni) {
+  const sheen = (color, sc) => new THREE.MeshPhysicalMaterial({ color, roughness: skin.metal ? 0.35 : 0.78, metalness: skin.metal ? 0.45 : 0, sheen: skin.metal ? 0 : 1, sheenRoughness: 0.45, sheenColor: new THREE.Color(sc),
+    transparent: !!skin.translucent, opacity: skin.translucent ? 0.85 : 1 });
+  const pink = sheen(skin.body, skin.sheen), bellyM = sheen(skin.belly, 0xffffff), deep = sheen(skin.deep, skin.sheen);
   const mesh = (g, m) => { const x = new THREE.Mesh(g, m); x.castShadow = true; x.receiveShadow = true; return x; };
   const toSurface = (obj, dir, r) => { dir.normalize(); obj.position.copy(dir).multiplyScalar(r); obj.quaternion.setFromUnitVectors(new V3(0, 0, 1), dir); };
 
@@ -793,7 +926,7 @@ function makeKiboroni() {
 
   // eyes
   const eyeDark = new THREE.MeshStandardMaterial({ color: 0x2b0d14, roughness: 0.25 });
-  const eyeGlow = new THREE.MeshStandardMaterial({ color: 0xff5fa2, emissive: 0xff4f9a, emissiveIntensity: 0.4, roughness: 0.3 });
+  const eyeGlow = new THREE.MeshStandardMaterial({ color: skin.glow, emissive: skin.glow, emissiveIntensity: 0.4, roughness: 0.3 });
   const eyeHi = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.6 });
   const eyes = [-1, 1].map(side => {
     const outer = new THREE.Group(), g = new THREE.Group(); outer.add(g);
@@ -804,14 +937,14 @@ function makeKiboroni() {
     puff.add(outer); return g;
   });
   // blush
-  const blushM = new THREE.MeshStandardMaterial({ color: 0xff4f96, transparent: true, opacity: 0.55, depthWrite: false, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2 });
+  const blushM = new THREE.MeshStandardMaterial({ color: skin.blush, transparent: true, opacity: 0.55, depthWrite: false, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2 });
   [-1, 1].forEach(side => {
     const b = new THREE.Mesh(new THREE.CircleGeometry(0.072, 28), blushM); b.scale.x = 1.45;
     toSurface(b, new V3(side * 0.36, 0.03, 0.36), 0.506); puff.add(b);
   });
   // mouth (puckered lips)
   const mouth = new THREE.Group();
-  const lip = mesh(new THREE.TorusGeometry(0.068, 0.036, 16, 32), sheen(0xff9ccb, 0xffe0ef)); lip.scale.set(1.15, 0.85, 1); mouth.add(lip);
+  const lip = mesh(new THREE.TorusGeometry(0.068, 0.036, 16, 32), sheen(skin.lip, 0xffe0ef)); lip.scale.set(1.15, 0.85, 1); mouth.add(lip);
   const hole = new THREE.Mesh(new THREE.CircleGeometry(0.07, 24), new THREE.MeshStandardMaterial({ color: 0x9b1d4a, roughness: 1 }));
   hole.scale.set(1.15, 0.85, 1); hole.position.z = -0.012; mouth.add(hole);
   const tongue = mesh(SPHG, new THREE.MeshStandardMaterial({ color: 0xff6f91, roughness: 0.7 })); tongue.scale.set(0.045, 0.022, 0.02); tongue.position.set(0, -0.025, -0.004); mouth.add(tongue);
@@ -835,22 +968,84 @@ function makeKiboroni() {
   const feet = [-1, 1].map(side => {
     const f = mesh(SPHG, deep); f.scale.set(0.15, 0.085, 0.24); f.position.set(side * 0.2, 0.08, 0.06); body.add(f); return f;
   });
+  if (skin.noFins) [finL, finR, tail].forEach(f => { f.visible = false; });
+  if (skin.noFeet) feet.forEach(f => { f.visible = false; });
+
+  // necklace with the blue diamond gem
+  const cord = mesh(new THREE.TorusGeometry(0.495, 0.02, 8, 64), new THREE.MeshStandardMaterial({ color: 0xffd54a, metalness: 0.5, roughness: 0.35 }));
+  cord.position.y = -0.06; cord.rotation.x = Math.PI / 2 + 0.3; puff.add(cord);
+  const gem = new THREE.Group(); gem.position.set(0, -0.21, 0.5); puff.add(gem);
+  const gemMat = new THREE.MeshPhysicalMaterial({ color: 0x3da8ff, emissive: 0x1f6fff, emissiveIntensity: 0.5, roughness: 0.08, metalness: 0.1, clearcoat: 1, flatShading: true });
+  const stone = mesh(new THREE.OctahedronGeometry(0.1, 0), gemMat); stone.scale.set(1, 1.4, 0.7); stone.position.y = -0.11; gem.add(stone);
+  const bail = mesh(new THREE.TorusGeometry(0.022, 0.008, 6, 14), cord.material); bail.position.y = 0.04; gem.add(bail);
+  const gemShine = new THREE.Mesh(SPHG, new THREE.MeshBasicMaterial({ color: 0xffffff })); gemShine.scale.setScalar(0.016); gemShine.position.set(-0.03, -0.07, 0.07); gem.add(gemShine);
+
+  // character extras
+  let anim = null;
+  if (skin.extras === 'spikes') {
+    const cone = new THREE.ConeGeometry(0.045, 0.13, 8);
+    const n = 46;
+    for (let i = 0; i < n; i++) {
+      const y = 1 - (i + 0.5) / n * 2, rr = Math.sqrt(1 - y * y), th = i * 2.39996;
+      const dir = new V3(Math.cos(th) * rr, y, Math.sin(th) * rr);
+      if (dir.z > 0.35 && dir.y > -0.75 || dir.y < -0.7) continue; // keep the face and feet clear
+      const c = mesh(cone, deep); c.position.copy(dir).multiplyScalar(0.53); c.quaternion.setFromUnitVectors(new V3(0, 1, 0), dir); puff.add(c);
+    }
+  } else if (skin.extras === 'jelly') {
+    const skirt = mesh(new THREE.TorusGeometry(0.46, 0.08, 10, 40), bellyM); skirt.rotation.x = Math.PI / 2; skirt.scale.z = 0.6; skirt.position.y = -0.18; puff.add(skirt);
+    const tents = [];
+    for (let i = 0; i < 7; i++) {
+      const a = i / 7 * Math.PI * 2, piv = new THREE.Group();
+      piv.position.set(Math.cos(a) * 0.28, -0.3, Math.sin(a) * 0.28);
+      const t = mesh(new THREE.CapsuleGeometry(0.035, 0.22, 4, 8), i % 2 ? deep : pink); t.position.y = -0.14; piv.add(t);
+      puff.add(piv); tents.push(piv);
+    }
+    anim = (t, spd) => tents.forEach((p, i) => { p.rotation.x = Math.sin(t * (3 + spd) + i) * 0.35; p.rotation.z = Math.cos(t * 2.5 + i * 1.7) * 0.25; });
+  } else if (skin.extras === 'bunny') {
+    const inner = sheen(0xffb3cf, 0xffffff), ears = [];
+    [-1, 1].forEach(sd => {
+      const piv = new THREE.Group(); piv.position.set(sd * 0.17, 0.42, -0.05); piv.rotation.z = -sd * 0.18;
+      const e = mesh(SPHG, pink); e.scale.set(0.1, 0.3, 0.06); e.position.y = 0.26; piv.add(e);
+      const ie = mesh(SPHG, inner); ie.scale.set(0.055, 0.22, 0.03); ie.position.set(0, 0.26, 0.04); piv.add(ie);
+      puff.add(piv); ears.push(piv);
+    });
+    const pom = mesh(SPHG, pink); pom.scale.setScalar(0.12); pom.position.set(0, -0.18, -0.5); puff.add(pom);
+    anim = (t, spd) => ears.forEach((e, i) => { e.rotation.x = -0.15 + Math.sin(t * (2 + spd * 2) + i) * (0.08 + spd * 0.04); });
+  } else if (skin.extras === 'robo') {
+    const pole = mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 8), deep); pole.position.y = 0.6; puff.add(pole);
+    const bulbM = new THREE.MeshStandardMaterial({ color: 0xff5a7a, emissive: 0xff3a5a, emissiveIntensity: 0.8 });
+    const bulb = mesh(SPHG, bulbM); bulb.scale.setScalar(0.055); bulb.position.y = 0.73; puff.add(bulb);
+    [-1, 1].forEach(sd => { const b = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.05, 16), deep); b.rotation.z = Math.PI / 2; b.position.set(sd * 0.5, 0.12, 0); puff.add(b); });
+    anim = t => { bulbM.emissiveIntensity = 0.5 + (Math.sin(t * 6) > 0 ? 0.8 : 0); };
+  } else if (skin.extras === 'frog') {
+    [-1, 1].forEach((sd, i) => {
+      const dome = mesh(SPHG, pink); dome.scale.setScalar(0.15); dome.position.set(sd * 0.19, 0.4, 0.2); puff.add(dome);
+      const outer = eyes[i].parent; outer.position.set(sd * 0.19, 0.42, 0.33); outer.quaternion.identity(); outer.scale.setScalar(0.85);
+    });
+    [[0.25, 0.2, -0.38], [-0.3, 0.05, -0.4], [0.05, 0.35, -0.33]].forEach(([x, y, z]) => {
+      const spot = mesh(SPHG, deep); spot.position.set(x, y, z); spot.scale.set(0.07, 0.07, 0.03); spot.lookAt(spot.position.clone().multiplyScalar(2)); puff.add(spot);
+    });
+  }
   root.scale.setScalar(0.62);
-  return { root, body, puff, eyes, finL, finR, tail, feet, mouth };
+  return { root, body, puff, eyes, finL, finR, tail, feet, mouth, gem, gemMat, bodyMat: pink, skin, anim };
 }
 
-const kibo = makeKiboroni();
+const kibo = makeKiboroni(SKINS.kiboroni);
+const hoverNdc = new THREE.Vector2(2, 2);
+const powers = new Set();
+const mods = { speed: 1, jump: 1, size: 1 };
+const holo = { open: false, k: 0, tab: 0 };
 scene.add(kibo.root);
 kibo.root.traverse(o => { o.userData.isKibo = true; });
 
 const player = {
   pos: new V3(-4.5, 0, -1.65), vel: new V3(), vy: 0, yaw: 0, grounded: true,
-  r: 0.3, h: 0.68, walkPhase: 0, squash: 0, squashV: 0, inflate: 0, blinkT: 2,
+  sizeK: 1, r: 0.3, h: 0.68, walkPhase: 0, squash: 0, squashV: 0, inflate: 0, blinkT: 2,
 };
 
 // Beach ball
 {
-  const ballMesh = M(new THREE.SphereGeometry(0.32, 32, 20), new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.45 }), NS);
+  const ballMesh = ballObj();
   ballMesh.position.set(4.2, 0.32, 3.8); scene.add(ballMesh);
   registerProp(ballMesh, { rolls: true, bounce: 0.55 });
 }
@@ -863,7 +1058,13 @@ let jumpHeld = false, jumpPressed = false;
 addEventListener('keydown', e => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.code === 'Space' && !e.repeat) jumpPressed = true;
-  if (e.code === 'KeyF' && !e.repeat) grabOrDrop();
+  if (e.code === 'Escape') { if (holo.open) toggleHolo(false); else if (!shopEl.hidden) closeShop(); else if (placing) endPlacing(); }
+  if (e.code === 'KeyG' && !e.repeat) toggleHolo();
+  if (holo.open) return;
+  if (placing && e.code === 'KeyR' && !e.repeat) rotatePlacing();
+  if (placing && e.code === 'Enter') commitPlacing();
+  if (!shopEl.hidden) return;
+  if (e.code === 'KeyF' && !e.repeat && !placing) grabOrDrop();
   keys[e.code] = true;
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
@@ -891,6 +1092,12 @@ const touches = new Map();
 let pinch = null;
 cv.addEventListener('pointerdown', e => {
   try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  if (placing) { // placement mode: pointer positions the item, click places it
+    placing.usePointer = true; setPlaceNdc(e);
+    if (e.pointerType === 'mouse' && e.button === 0) { updatePlacing(0); commitPlacing(); }
+    else if (e.pointerType === 'mouse' && e.button === 2) rotatePlacing();
+    return;
+  }
   if (e.pointerType === 'mouse' && e.button === 0) {
     mouse.id = e.pointerId;
     mouse.held = selectAt(e); // hold on the floor = keep following the cursor
@@ -908,6 +1115,8 @@ cv.addEventListener('pointerdown', e => {
   }
 });
 cv.addEventListener('pointermove', e => {
+  if (e.pointerType === 'mouse') hoverNdc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  if (placing) { if (e.pointerType === 'mouse' || e.buttons) { placing.usePointer = true; setPlaceNdc(e); } return; }
   if (mouse.held && e.pointerId === mouse.id) setNdc(e);
   if (touches.has(e.pointerId)) {
     touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -996,6 +1205,14 @@ function updatePlayer(dt, t) {
   if (keys.KeyA || keys.ArrowLeft) ix -= 1;
   if (keys.KeyD || keys.ArrowRight) ix += 1;
   ix += joy.x; iz += joy.y;
+  if (holo.open) { ix = iz = 0; mouse.target = null; mouse.grabProp = null; jumpPressed = false; }
+  // power-ups and character abilities
+  const ab = kibo.skin.ability || {};
+  mods.speed = (powers.has('speed') ? 1.8 : 1) * (ab.speed || 1);
+  mods.jump = (powers.has('jump') ? 1.45 : 1) * (ab.jump || 1);
+  mods.size = powers.has('giant') ? 1.6 : powers.has('tiny') ? 0.6 : 1;
+  player.sizeK += (mods.size - player.sizeK) * Math.min(1, dt * 6);
+  player.r = 0.3 * player.sizeK; player.h = 0.68 * player.sizeK; HEAD = 0.66 * player.sizeK;
   const il = Math.hypot(ix, iz); if (il > 1) { ix /= il; iz /= il; }
   if (keys.KeyQ) cam.yaw += dt * 1.8;
   if (keys.KeyE) cam.yaw -= dt * 1.8;
@@ -1039,8 +1256,8 @@ function updatePlayer(dt, t) {
   }
 
   const accel = player.grounded ? 14 : 6;
-  player.vel.x += (mx * SPEED - player.vel.x) * Math.min(1, accel * dt);
-  player.vel.z += (mz * SPEED - player.vel.z) * Math.min(1, accel * dt);
+  player.vel.x += (mx * SPEED * mods.speed - player.vel.x) * Math.min(1, accel * dt);
+  player.vel.z += (mz * SPEED * mods.speed - player.vel.z) * Math.min(1, accel * dt);
   if (moving) player.yaw = lerpAngle(player.yaw, Math.atan2(mx, mz), Math.min(1, 12 * dt));
 
   // horizontal move + collisions
@@ -1052,11 +1269,11 @@ function updatePlayer(dt, t) {
   // vertical
   const jumpDown = keys.Space || keys.TouchJump || mouse.held;
   if (jumpPressed && player.grounded) {
-    player.vy = JUMP; player.grounded = false; player.squashV = -6; player.justJumped = true;
+    player.vy = JUMP * mods.jump; player.grounded = false; player.squashV = -6; player.justJumped = true;
   }
   jumpPressed = false;
   player.vy -= GRAV * dt;
-  const floating = !player.grounded && jumpDown && player.vy < 0;
+  const floating = !player.grounded && player.vy < 0 && (jumpDown || ab.float);
   if (floating) player.vy = Math.max(player.vy, -1.3);
   player.inflate += ((floating ? 1 : 0) - player.inflate) * Math.min(1, dt * 10);
 
@@ -1087,6 +1304,7 @@ function updatePlayer(dt, t) {
   const k = kibo;
   k.root.position.copy(player.pos);
   k.root.rotation.y = player.yaw;
+  k.root.scale.setScalar(0.62 * player.sizeK);
 
   // squash spring
   player.squashV += (-player.squash * 120 - player.squashV * 12) * dt;
@@ -1136,10 +1354,13 @@ function updatePlayer(dt, t) {
   if (player.blinkT < 0.12) eyeS = Math.max(0.1, Math.abs(player.blinkT - 0.06) / 0.06);
   if (player.blinkT < 0) player.blinkT = rnd(2, 5);
   k.eyes.forEach(e => e.scale.y = eyeS);
+  if (k.anim) k.anim(t, speed / SPEED);
+  if (powers.has('rainbow')) k.bodyMat.color.setHSL((t * 0.3) % 1, 0.85, 0.7);
+  k.gem.rotation.z = Math.sin(t * 2.2) * 0.12 - (walking ? Math.sin(ph) * 0.15 : 0);
 }
 
 let held = null;
-const HEAD = 0.66; // top of Kiboroni's head (world units)
+let HEAD = 0.66; // top of Kiboroni's head (world units); changes with Giant / Tiny
 function reachable(p) {
   const o = p.obj.position, dx = o.x - player.pos.x, dz = o.z - player.pos.z, d = Math.hypot(dx, dz);
   const feet = o.y - p.base;
@@ -1200,7 +1421,7 @@ function updateProps(dt) {
     if (d < minD && d > 1e-4 && feet < player.pos.y + player.h - 0.05 && feet + p.h > player.pos.y + 0.05) {
       const nx = dx / d, nz = dz / d;
       o.position.x += nx * (minD - d); o.position.z += nz * (minD - d);
-      const push = Math.max(1.2, player.vel.x * nx + player.vel.z * nz) * (p.rolls ? 1.4 : 0.9);
+      const push = Math.max(1.2, player.vel.x * nx + player.vel.z * nz) * (p.rolls ? 1.4 : 0.9) * (kibo.skin.ability.push || 1) * (powers.has('shield') ? 1.5 : 1);
       p.vel.x = nx * push + player.vel.x * 0.3; p.vel.z = nz * push + player.vel.z * 0.3;
       p.asleep = false;
     }
@@ -1281,6 +1502,13 @@ function blip(f0, f1, dur, vol, type = 'sine', delay = 0) {
 let lastThud = 0;
 const sfx = {
   grab() { blip(420, 700, 0.07, 0.25, 'triangle'); blip(620, 1050, 0.08, 0.22, 'triangle', 0.06); },
+  holo(on) {
+    if (on) { blip(300, 1400, 0.35, 0.16, 'sine'); [0, 1, 2, 3].forEach(i => blip(880 + i * 220, 900 + i * 220, 0.06, 0.08, 'triangle', 0.18 + i * 0.05)); }
+    else blip(1200, 220, 0.25, 0.14, 'sine');
+  },
+  power() { [0, 1, 2].forEach(i => blip(520 * Math.pow(1.26, i), 560 * Math.pow(1.26, i), 0.09, 0.18, 'square', i * 0.07)); },
+  transform() { blip(200, 900, 0.3, 0.2, 'triangle'); blip(900, 1800, 0.18, 0.12, 'sine', 0.22); },
+  blipUI() { blip(900, 1100, 0.04, 0.1, 'triangle'); },
   drop() { blip(700, 380, 0.1, 0.22, 'triangle'); },
   thud(h) { const c = audio.ctx; if (!c || c.currentTime - lastThud < 0.06) return; lastThud = c.currentTime; blip(260 - Math.min(h, 1) * 120, 90, 0.09, 0.2); },
   // a little "bloop-pop": a quick rising sine (the bubble) + a tiny click (the burst)
@@ -1319,14 +1547,14 @@ const dropGeo = new THREE.SphereGeometry(1, 8, 6);
 const bubbles = [], bursts = [];
 let bubbleTimer = 0.2;
 
-function spawnBubble(big) {
+function spawnBubble(big, at = null, vel0 = null) {
   const mat = bubbleMat.clone(), sm = shineMat.clone();
   const m = new THREE.Mesh(bubbleGeo, mat);
   const shine = new THREE.Mesh(bubbleGeo, sm); shine.scale.setScalar(0.2); shine.position.set(-0.38, 0.42, 0.55); m.add(shine);
-  kibo.mouth.getWorldPosition(m.position);
+  if (at) m.position.copy(at); else kibo.mouth.getWorldPosition(m.position);
   const fwd = new V3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
   const size = big ? rnd(0.09, 0.13) : rnd(0.05, 0.09);
-  const vel = fwd.clone().multiplyScalar(rnd(0.5, 1.0))
+  const vel = vel0 ? vel0.clone() : fwd.clone().multiplyScalar(rnd(0.5, 1.0))
     .add(new V3(rnd(-0.25, 0.25), rnd(0.45, 0.85), rnd(-0.25, 0.25)))
     .addScaledVector(player.vel, 0.35);
   m.scale.setScalar(0.001);
@@ -1380,9 +1608,499 @@ function updateBubbles(dt, t) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Shop: a tabbed gallery of items that can be placed in the house
+// kind: 'solid' = furniture you bump into / stand on, 'prop' = can be carried, 'flat' = rugs
+// ---------------------------------------------------------------------------
+const SHOP = [
+  { tab: 'Furniture', items: [
+    { name: 'Pink Sofa', kind: 'solid', make: () => sofa(0xff9fbe) },
+    { name: 'Sky Armchair', kind: 'solid', make: () => sofa(0x8fd3ff, 1.25) },
+    { name: 'Mint Armchair', kind: 'solid', make: () => sofa(0x9fe0cf, 1.25) },
+    { name: 'Coffee Table', kind: 'solid', make: coffeeTable },
+    { name: 'Bookshelf', kind: 'solid', make: bookshelf },
+    { name: 'Dining Chair', kind: 'solid', make: () => chair(0xffb3d1) },
+    { name: 'Nightstand', kind: 'solid', make: nightstand },
+    { name: 'Floor Lamp', kind: 'solid', make: floorLamp },
+  ] },
+  { tab: 'Soft Furnishings', items: [
+    { name: 'Strawberry Rug', kind: 'flat', make: () => rugObj(1.5, 1.5, rugTex(['#ff7fa8', '#ffd0e0', '#ffffff', '#ffe3ec'])) },
+    { name: 'Ocean Rug', kind: 'flat', make: () => rugObj(2.0, 1.4, rugTex(['#4cb7ff', '#bfe6ff', '#ffffff', '#e2f4ff'])) },
+    { name: 'Lemon Rug', kind: 'flat', make: () => rugObj(1.3, 1.3, rugTex(['#ffd34d', '#fff0b0', '#ffb36b', '#fff8dc'])) },
+    { name: 'Orange Bean Bag', kind: 'solid', make: () => beanbag(0xffa25a) },
+    { name: 'Lilac Bean Bag', kind: 'solid', make: () => beanbag(0xc9b5ff) },
+    { name: 'Pink Cushion', kind: 'prop', make: () => cushion(0xff86bf, 0xffd34d) },
+    { name: 'Mint Cushion', kind: 'prop', make: () => cushion(0x9fe0cf, 0xffffff) },
+    { name: 'Sunny Pouf', kind: 'solid', make: () => pouf(0xffd34d, 0xff9fbe) },
+  ] },
+  { tab: 'Toys', items: [
+    { name: 'Beach Ball', kind: 'prop', opts: { rolls: true, bounce: 0.55 }, make: ballObj },
+    { name: 'Rubber Duck', kind: 'prop', make: duck },
+    { name: 'Teddy Bear', kind: 'prop', make: teddy },
+    { name: 'Red Block', kind: 'prop', make: () => block(0.5, 0.5, 0xff6f91, 0xffffff) },
+    { name: 'Blue Block', kind: 'prop', make: () => block(0.5, 0.5, 0x6fc3ff, 0xffd34d) },
+    { name: 'Toy Chest', kind: 'solid', make: toyChest },
+  ] },
+  { tab: 'Plants & Lamps', items: [
+    { name: 'Little Plant', kind: 'prop', make: () => plant(0.8) },
+    { name: 'Big Plant', kind: 'solid', make: () => plant(1.35) },
+    { name: 'Pink Table Lamp', kind: 'prop', make: () => tableLamp(0xffb3d1) },
+    { name: 'Blue Table Lamp', kind: 'prop', make: () => tableLamp(0x8fd3ff) },
+  ] },
+];
+const KIND_LABEL = { solid: 'Furniture', prop: 'Can carry', flat: 'Floor' };
+
+// item thumbnails, rendered once with a small offscreen renderer
+let thumbKit = null;
+function thumbnail(item) {
+  if (!thumbKit) {
+    const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    r.setPixelRatio(1); r.setSize(200, 200);
+    r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.1;
+    const s = new THREE.Scene();
+    s.add(new THREE.HemisphereLight(0xffffff, 0xffd2e4, 1.9));
+    const d = new THREE.DirectionalLight(0xffffff, 2.2); d.position.set(3, 6, 4); s.add(d);
+    thumbKit = { r, s, cam: new THREE.PerspectiveCamera(30, 1, 0.01, 100) };
+  }
+  const { r, s, cam } = thumbKit;
+  const obj = item.make(); s.add(obj); obj.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  obj.traverse(o => { if (o.isMesh && o.visible) { o.geometry.computeBoundingBox(); box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld)); } });
+  const c = box.getCenter(new V3()), rad = box.getSize(new V3()).length() / 2;
+  const dist = rad / Math.sin(THREE.MathUtils.degToRad(15)) * 0.92;
+  cam.position.copy(c).add(new V3(0.7, 0.75, 1).normalize().multiplyScalar(dist)); cam.lookAt(c);
+  r.render(s, cam);
+  const url = r.domElement.toDataURL('image/png');
+  s.remove(obj);
+  return url;
+}
+
+const shopEl = document.getElementById('shop'), shopTabsEl = document.getElementById('shopTabs'), shopGridEl = document.getElementById('shopGrid');
+let shopTab = 0;
+function renderShop() {
+  shopTabsEl.replaceChildren(...SHOP.map((t, i) => {
+    const b = document.createElement('button');
+    b.textContent = t.tab; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === shopTab);
+    b.addEventListener('click', () => { shopTab = i; renderShop(); });
+    return b;
+  }));
+  shopGridEl.replaceChildren(...SHOP[shopTab].items.map(item => {
+    if (!item.thumb) item.thumb = thumbnail(item);
+    const b = document.createElement('button');
+    const img = document.createElement('img'); img.src = item.thumb; img.alt = '';
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = item.name;
+    const kd = document.createElement('span'); kd.className = 'kd'; kd.textContent = KIND_LABEL[item.kind];
+    b.append(img, nm, kd);
+    b.addEventListener('click', () => { closeShop(); startPlacing(item); });
+    return b;
+  }));
+}
+function openShop() { if (placing) endPlacing(); shopEl.hidden = false; renderShop(); sfx.grab(); }
+function closeShop() { shopEl.hidden = true; }
+document.getElementById('shopBtn').addEventListener('click', () => (shopEl.hidden ? openShop() : closeShop()));
+document.getElementById('shopClose').addEventListener('click', closeShop);
+shopEl.addEventListener('pointerdown', e => { if (e.target === shopEl) closeShop(); });
+
+// ---- placement mode ----
+let placing = null;
+const placeNdc = new THREE.Vector2();
+const setPlaceNdc = e => placeNdc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+const placeBar = document.getElementById('placeBar'), placeOk = document.getElementById('placeOk');
+const footprint = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0x5fcf7a, transparent: true, opacity: 0.4, depthWrite: false }));
+footprint.rotation.x = -Math.PI / 2; footprint.visible = false; scene.add(footprint);
+const placeBox = new THREE.Box3();
+const spawnAnims = [];
+
+function startPlacing(item) {
+  const ghost = item.make();
+  const lightsIn = []; ghost.traverse(o => { if (o.isLight) lightsIn.push(o); });
+  lightsIn.forEach(l => l.parent.remove(l)); // keep the scene's light count steady while previewing
+  ghost.traverse(o => {
+    if (!o.isMesh) return;
+    o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = 0.62; o.material.depthWrite = false;
+    o.castShadow = false; o.userData.solid = false;
+  });
+  scene.add(ghost); ghost.updateMatrixWorld(true);
+  placeBox.setFromObject(ghost);
+  const fx = Math.sin(player.yaw), fz = Math.cos(player.yaw);
+  placing = { item, ghost, rot: 0, valid: false, lift: -placeBox.min.y, usePointer: false, x: player.pos.x + fx * 1.4, z: player.pos.z + fz * 1.4 };
+  mouse.target = null; mouse.grabProp = null; mouse.held = false;
+  footprint.visible = true; placeBar.hidden = false;
+  document.getElementById('placeName').textContent = item.name;
+  document.getElementById('placeHint').textContent = matchMedia('(pointer: coarse)').matches
+    ? 'Drag on the floor to position · Rotate · Place'
+    : 'Move the pointer to position · Click to place · R or right-click to rotate · Esc to cancel';
+}
+function rotatePlacing() { if (placing) placing.rot += Math.PI / 2; }
+function endPlacing() {
+  if (!placing) return;
+  scene.remove(placing.ghost);
+  placing.ghost.traverse(o => { if (o.isMesh) o.material.dispose(); });
+  placing = null; footprint.visible = false; placeBar.hidden = true;
+}
+function updatePlacing(dt) {
+  if (!placing) return;
+  const P = placing, g = P.ghost;
+  if (P.usePointer) {
+    raycaster.setFromCamera(placeNdc, camera); groundPlane.constant = 0;
+    if (raycaster.ray.intersectPlane(groundPlane, planeHit)) { P.x = planeHit.x; P.z = planeHit.z; }
+  } else { // keyboard players: the item hovers in front of Kiboroni
+    P.x = player.pos.x + Math.sin(player.yaw) * 1.4; P.z = player.pos.z + Math.cos(player.yaw) * 1.4;
+  }
+  g.rotation.y += (P.rot - g.rotation.y) * Math.min(1, (dt || 1) * 18);
+  g.position.set(Math.round(P.x * 4) / 4, P.lift, Math.round(P.z * 4) / 4);
+  // validity uses the final rotation
+  const shown = g.rotation.y; g.rotation.y = P.rot; g.updateMatrixWorld(true);
+  placeBox.setFromObject(g);
+  g.rotation.y = shown; g.updateMatrixWorld(true);
+  const b = placeBox, m = 0.02;
+  let ok = b.min.x > HOUSE.x1 + 0.15 && b.max.x < HOUSE.x2 - 0.15 && b.min.z > HOUSE.z1 + 0.15 && b.max.z < HOUSE.z2 - 0.15;
+  if (ok && P.item.kind !== 'flat') {
+    for (const c of colliders) {
+      if (c.top > 0.05 && b.min.x < c.maxX - m && b.max.x > c.minX + m && b.min.z < c.maxZ - m && b.max.z > c.minZ + m) { ok = false; break; }
+    }
+    const cx = clamp(player.pos.x, b.min.x, b.max.x), cz = clamp(player.pos.z, b.min.z, b.max.z);
+    if (ok && Math.hypot(player.pos.x - cx, player.pos.z - cz) < player.r) ok = false;
+  }
+  P.valid = ok;
+  placeOk.disabled = !ok;
+  footprint.material.color.set(ok ? 0x5fcf7a : 0xff5a7a);
+  footprint.position.set((b.min.x + b.max.x) / 2, 0.02, (b.min.z + b.max.z) / 2);
+  footprint.scale.set(b.max.x - b.min.x + 0.12, b.max.z - b.min.z + 0.12, 1);
+}
+function commitPlacing() {
+  if (!placing) return;
+  if (!placing.valid) { sfx.drop(); return; }
+  const { item, ghost } = placing;
+  const obj = item.make();
+  obj.position.copy(ghost.position); obj.rotation.y = placing.rot;
+  scene.add(obj); obj.updateMatrixWorld(true);
+  const entry = { obj, item, cols: [], prop: null, top: new THREE.Box3().setFromObject(obj).max.y - obj.position.y, linger: 0 };
+  if (item.kind === 'prop') entry.prop = registerProp(obj, item.opts || {});
+  else if (item.kind === 'solid') {
+    const b = new THREE.Box3();
+    obj.traverse(o => {
+      if (!o.isMesh || !o.userData.solid) return;
+      b.setFromObject(o);
+      const c = { minX: b.min.x, maxX: b.max.x, minZ: b.min.z, maxZ: b.max.z, minY: b.min.y, top: b.max.y };
+      colliders.push(c); entry.cols.push(c);
+    });
+  }
+  addPlaced(entry);
+  obj.userData.fullScale = obj.scale.clone();
+  obj.scale.multiplyScalar(0.01);
+  spawnAnims.push({ obj, t: 0 });
+  sfx.grab();
+  for (let i = 0; i < 4; i++) setTimeout(() => sfx.pop(rnd(0.05, 0.12)), 60 + i * 70);
+  endPlacing();
+}
+function updateSpawnAnims(dt) {
+  for (let i = spawnAnims.length - 1; i >= 0; i--) {
+    const a = spawnAnims[i]; a.t = Math.min(1, a.t + dt / 0.35);
+    const k = 1 + 2.2 * Math.pow(a.t - 1, 3) + 1.2 * Math.pow(a.t - 1, 2); // ease-out-back
+    a.obj.scale.copy(a.obj.userData.fullScale).multiplyScalar(Math.max(0.01, k));
+    if (a.t >= 1) { a.obj.scale.copy(a.obj.userData.fullScale); spawnAnims.splice(i, 1); }
+  }
+}
+document.getElementById('placeRotate').addEventListener('click', rotatePlacing);
+placeOk.addEventListener('click', commitPlacing);
+document.getElementById('placeCancel').addEventListener('click', endPlacing);
+
+// ---------------------------------------------------------------------------
+// Sparkles (little glowing bits for powers, the beam and transformations)
+// ---------------------------------------------------------------------------
+const sparkGeo = new THREE.OctahedronGeometry(1, 0), sparks = [];
+function spark(pos, color, vel, life = 0.5, size = 0.05, additive = false) {
+  const m = new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial({ color, transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending }));
+  m.position.copy(pos); m.scale.setScalar(size); scene.add(m);
+  sparks.push({ m, vel, life, age: 0, size });
+}
+function updateSparks(dt) {
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i]; s.age += dt;
+    const k = s.age / s.life;
+    s.m.position.addScaledVector(s.vel, dt); s.m.rotation.y += dt * 6; s.m.rotation.x += dt * 4;
+    s.m.scale.setScalar(s.size * Math.max(0.001, 1 - k)); s.m.material.opacity = 1 - k;
+    if (k >= 1) { scene.remove(s.m); s.m.material.dispose(); sparks.splice(i, 1); }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Gem screen: press G, the gem lights up and beams a hologram menu
+// ---------------------------------------------------------------------------
+const ICONS = {
+  speed: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  jump: '<path d="M12 3v12M7 8l5-5 5 5M6 21h12M8 17h8"/>',
+  giant: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5M9 9l-5-5M15 9l5-5M9 15l-5 5M15 15l5 5"/>',
+  tiny: '<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>',
+  shield: '<circle cx="12" cy="12" r="9"/><path d="M8 9a4.5 4.5 0 0 1 4-2.5"/>',
+  rainbow: '<path d="M2 18a10 10 0 0 1 20 0M5.5 18a6.5 6.5 0 0 1 13 0M9 18a3 3 0 0 1 6 0"/>',
+};
+const POWERS = [
+  { id: 'speed', name: 'Super Speed', about: 'Zoom around the house' },
+  { id: 'jump', name: 'Mega Jump', about: 'Leap onto almost anything' },
+  { id: 'giant', name: 'Giant', about: 'Grow extra big', excl: 'tiny' },
+  { id: 'tiny', name: 'Tiny', about: 'Shrink right down', excl: 'giant' },
+  { id: 'shield', name: 'Bubble Shield', about: 'Wrapped in a big bubble' },
+  { id: 'rainbow', name: 'Rainbow', about: 'Shimmer through every colour' },
+];
+const holoEl = document.getElementById('holo'), holoPanel = holoEl.querySelector('.holo-panel');
+const holoTabsEl = document.getElementById('holoTabs'), holoGridEl = document.getElementById('holoGrid');
+const gemBtn = document.getElementById('gemBtn');
+const charThumbs = {};
+
+function toggleHolo(force) {
+  const open = force ?? !holo.open;
+  if (open === holo.open) return;
+  holo.open = open;
+  gemBtn.classList.toggle('on', open);
+  if (open) {
+    if (placing) endPlacing();
+    closeShop();
+    sfx.holo(true);
+  } else {
+    holoEl.hidden = true;
+    sfx.holo(false);
+  }
+}
+gemBtn.addEventListener('click', () => toggleHolo());
+document.getElementById('holoClose').addEventListener('click', () => toggleHolo(false));
+holoEl.addEventListener('pointerdown', e => { if (e.target === holoEl) toggleHolo(false); });
+
+function renderHolo() {
+  holoTabsEl.replaceChildren(...['Power-ups', 'Transform'].map((name, i) => {
+    const b = document.createElement('button');
+    b.textContent = name; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === holo.tab);
+    b.addEventListener('click', () => { holo.tab = i; renderHolo(); sfx.blipUI(); });
+    return b;
+  }));
+  const card = (on, iconHTML, name, about, status, onClick) => {
+    const b = document.createElement('button');
+    b.className = on ? 'on' : ''; b.setAttribute('aria-pressed', on);
+    b.innerHTML = `<span class="ic">${iconHTML}</span><span class="nm"></span><span class="ab"></span><span class="st"></span>`;
+    b.querySelector('.nm').textContent = name; b.querySelector('.ab').textContent = about; b.querySelector('.st').textContent = status;
+    b.addEventListener('click', onClick);
+    return b;
+  };
+  if (holo.tab === 0) {
+    holoGridEl.replaceChildren(...POWERS.map(p => card(powers.has(p.id),
+      `<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[p.id]}</svg>`,
+      p.name, p.about, powers.has(p.id) ? 'ON' : 'OFF', () => togglePower(p.id))));
+  } else {
+    holoGridEl.replaceChildren(...Object.entries(SKINS).map(([id, sk]) => {
+      if (!charThumbs[id]) charThumbs[id] = thumbnail({ make: () => makeKiboroni(sk).root });
+      const cur = kibo.skin === sk;
+      return card(cur, `<img alt="" src="${charThumbs[id]}">`, sk.name, sk.about, cur ? 'CURRENT' : 'TRANSFORM', () => setCharacter(id));
+    }));
+  }
+}
+
+function renderPowerChips() {
+  document.getElementById('powerChips').replaceChildren(...POWERS.filter(p => powers.has(p.id)).map(p => {
+    const s = document.createElement('span'); s.textContent = p.name; return s;
+  }));
+}
+function togglePower(id) {
+  const p = POWERS.find(q => q.id === id);
+  if (powers.has(id)) {
+    powers.delete(id);
+    if (id === 'rainbow') kibo.bodyMat.color.set(kibo.skin.body);
+    if (id === 'shield') popShield();
+    sfx.holo(false);
+  } else {
+    powers.add(id);
+    if (p.excl) powers.delete(p.excl);
+    sfx.power();
+    burstAround(0x8fdcff, 14);
+  }
+  renderHolo(); renderPowerChips();
+}
+
+function setCharacter(id) {
+  const sk = SKINS[id];
+  if (kibo.skin === sk) return;
+  const old = kibo.root;
+  const fresh = makeKiboroni(sk);
+  fresh.root.position.copy(old.position); fresh.root.rotation.copy(old.rotation);
+  scene.remove(old);
+  old.traverse(o => { if (o.isMesh && o.material) o.material.dispose(); });
+  Object.assign(kibo, fresh);
+  kibo.root.traverse(o => { o.userData.isKibo = true; });
+  scene.add(kibo.root);
+  if (powers.has('rainbow')) kibo.bodyMat.color.set(sk.body);
+  player.squashV += 9;
+  // poof!
+  const c = new V3(player.pos.x, player.pos.y + 0.35 * player.sizeK, player.pos.z);
+  for (let i = 0; i < 10; i++) {
+    const a = i / 10 * Math.PI * 2;
+    spawnBubble(i % 2 === 0, c.clone().add(new V3(Math.cos(a) * 0.3, rnd(-0.1, 0.3), Math.sin(a) * 0.3)), new V3(Math.cos(a) * 1.2, rnd(0.6, 1.4), Math.sin(a) * 1.2));
+  }
+  burstAround(sk.body, 18);
+  sfx.transform();
+  renderHolo();
+}
+
+function burstAround(color, n) {
+  const c = new V3(player.pos.x, player.pos.y + 0.35 * player.sizeK, player.pos.z);
+  for (let i = 0; i < n; i++) {
+    const v = new V3(rnd(-1, 1), rnd(0.2, 1.2), rnd(-1, 1)).normalize().multiplyScalar(rnd(1.2, 2.4));
+    spark(c, i % 3 ? color : 0xffffff, v, rnd(0.4, 0.7), rnd(0.035, 0.06));
+  }
+}
+
+// beam from the gem up to the hologram
+const beamGeo = new THREE.CylinderGeometry(1, 0.05, 1, 32, 1, true); beamGeo.translate(0, 0.5, 0);
+const beamMat = new THREE.MeshBasicMaterial({ color: 0x4fb8ff, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+const beam = new THREE.Mesh(beamGeo, beamMat); beam.matrixAutoUpdate = false; beam.visible = false; beam.renderOrder = 5; scene.add(beam);
+const beamCore = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xbfeaff, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+beamCore.matrixAutoUpdate = false; beamCore.visible = false; scene.add(beamCore);
+const gemLight = new THREE.PointLight(0x5ab8ff, 0, 4, 2); scene.add(gemLight);
+const gemPos = new V3(), bTop = new V3(), bL = new V3(), bR = new V3(), bx = new V3(), by = new V3(), bz = new V3(), bm = new THREE.Matrix4(), ndcV = new THREE.Vector2();
+let beamSparkT = 0;
+function screenToWorld(px, py, dist, out) {
+  ndcV.set(px / innerWidth * 2 - 1, -(py / innerHeight) * 2 + 1);
+  raycaster.setFromCamera(ndcV, camera);
+  return raycaster.ray.at(dist, out);
+}
+function updateHolo(dt, t) {
+  holo.k += ((holo.open ? 1 : 0) - holo.k) * Math.min(1, dt * (holo.open ? 6 : 12));
+  kibo.gem.getWorldPosition(gemPos);
+  kibo.gemMat.emissiveIntensity = 0.55 + Math.sin(t * 3) * 0.25 + holo.k * 3.5;
+  gemLight.position.copy(gemPos); gemLight.intensity = holo.k * 4;
+  if (holo.open && holo.k > 0.55 && holoEl.hidden) { holoEl.hidden = false; renderHolo(); sfx.blipUI(); }
+  const show = holo.k > 0.02;
+  beam.visible = beamCore.visible = show;
+  if (!show) return;
+  // aim at the bottom edge of the hologram panel (or where it will appear)
+  let left, right, bottom;
+  const r = holoEl.hidden ? null : holoPanel.getBoundingClientRect();
+  if (r && r.width > 0) { left = r.left + r.width * 0.12; right = r.right - r.width * 0.12; bottom = r.bottom - 4; }
+  else { const w = Math.min(660, innerWidth - 32); left = innerWidth / 2 - w * 0.38; right = innerWidth / 2 + w * 0.38; bottom = 76 + innerHeight * 0.45; }
+  const d = camera.position.distanceTo(gemPos) * 0.85;
+  screenToWorld(left, bottom, d, bL); screenToWorld(right, bottom, d, bR);
+  bTop.copy(bL).add(bR).multiplyScalar(0.5);
+  const grow = Math.min(1, holo.k / 0.6);
+  by.copy(bTop).sub(gemPos); const len = by.length() * grow; by.normalize();
+  bx.copy(bR).sub(bL); bx.addScaledVector(by, -bx.dot(by)).normalize();
+  bz.crossVectors(bx, by).normalize();
+  const halfW = bL.distanceTo(bR) / 2;
+  bm.makeBasis(bx, by, bz).scale(new V3(halfW * grow, len, halfW * 0.08)).setPosition(gemPos);
+  beam.matrix.copy(bm); beam.matrixWorld.copy(bm);
+  bm.makeBasis(bx, by, bz).scale(new V3(halfW * 0.25 * grow, len, halfW * 0.03)).setPosition(gemPos);
+  beamCore.matrix.copy(bm); beamCore.matrixWorld.copy(bm);
+  beamMat.opacity = 0.1 + Math.sin(t * 20) * 0.02 + 0.06 * holo.k;
+  // sparkles travelling up the beam
+  beamSparkT -= dt;
+  if (holo.open && beamSparkT <= 0) {
+    beamSparkT = 0.05;
+    const f = rnd(-0.6, 0.6);
+    const target = bTop.clone().addScaledVector(bx, f * halfW);
+    const v = target.sub(gemPos).multiplyScalar(1 / 0.6);
+    spark(gemPos, Math.random() < 0.5 ? 0xbff0ff : 0xffffff, v, 0.6, 0.03, true);
+  }
+}
+
+// ---- power-up visuals ----
+const shield = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 28), bubbleMat.clone());
+shield.material.opacity = 0.32; shield.visible = false; shield.renderOrder = 4; scene.add(shield);
+let shieldK = 0, trailT = 0;
+function popShield() {
+  const c = shield.position.clone();
+  for (let i = 0; i < 12; i++) {
+    const v = new V3(rnd(-1, 1), rnd(-0.3, 1), rnd(-1, 1)).normalize();
+    spawnBubble(false, c.clone().addScaledVector(v, shield.scale.x * 0.9), v.multiplyScalar(1.2));
+  }
+  sfx.pop(0.13); shieldK = 0;
+}
+function updatePowers(dt, t) {
+  // bubble shield
+  const want = powers.has('shield') ? 1 : 0;
+  shieldK += (want - shieldK) * Math.min(1, dt * 8);
+  shield.visible = shieldK > 0.02;
+  if (shield.visible) {
+    const R = 0.5 * player.sizeK * shieldK + Math.sin(t * 5) * 0.01;
+    shield.position.set(player.pos.x, player.pos.y + 0.36 * player.sizeK + kibo.body.position.y * 0.62, player.pos.z);
+    shield.scale.set(R * (1 + Math.sin(t * 7) * 0.03), R * (1 - Math.sin(t * 7) * 0.03), R);
+  }
+  // speed trail
+  const sp = Math.hypot(player.vel.x, player.vel.z);
+  if (powers.has('speed') && sp > 3) {
+    trailT -= dt;
+    if (trailT <= 0) {
+      trailT = 0.025;
+      const p = new V3(player.pos.x + rnd(-0.15, 0.15), player.pos.y + rnd(0.1, 0.5) * player.sizeK, player.pos.z + rnd(-0.15, 0.15));
+      spark(p, [0xffd34d, 0xff86bf, 0x8fdcff][Math.floor(rnd(0, 3))], new V3(0, rnd(0.2, 0.6), 0), 0.45, 0.045);
+    }
+  }
+  if (powers.has('rainbow') && Math.random() < dt * 12) {
+    const p = new V3(player.pos.x + rnd(-0.3, 0.3), player.pos.y + rnd(0.2, 0.7) * player.sizeK, player.pos.z + rnd(-0.3, 0.3));
+    spark(p, new THREE.Color().setHSL(Math.random(), 0.9, 0.65), new V3(0, 0.5, 0), 0.6, 0.035);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Items added from the shop can be removed with a little trash button
+// (shows when Kiboroni is close to the item, or when the mouse hovers it)
+// ---------------------------------------------------------------------------
+const placed = [], trashLayer = document.getElementById('trashLayer'), removeAnims = [];
+const TRASH_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+function addPlaced(entry) {
+  entry.obj.traverse(o => { o.userData.placedEntry = entry; });
+  const b = document.createElement('button');
+  b.className = 'trash'; b.innerHTML = TRASH_SVG;
+  b.setAttribute('aria-label', `Remove ${entry.item.name}`); b.title = `Remove ${entry.item.name}`;
+  b.addEventListener('pointerdown', e => e.stopPropagation());
+  b.addEventListener('click', () => removePlaced(entry));
+  trashLayer.append(b); entry.el = b;
+  placed.push(entry);
+}
+function removePlaced(entry) {
+  const i = placed.indexOf(entry); if (i < 0) return;
+  placed.splice(i, 1); entry.el.remove();
+  for (const c of entry.cols) { const j = colliders.indexOf(c); if (j >= 0) colliders.splice(j, 1); }
+  if (entry.prop) {
+    if (held === entry.prop) held = null;
+    if (mouse.grabProp === entry.prop) { mouse.grabProp = null; mouse.target = null; }
+    const j = props.indexOf(entry.prop); if (j >= 0) props.splice(j, 1);
+  }
+  const si = spawnAnims.findIndex(a => a.obj === entry.obj); if (si >= 0) spawnAnims.splice(si, 1);
+  const c = entry.obj.position.clone(); c.y += entry.top * 0.5;
+  for (let k = 0; k < 6; k++) spawnBubble(k % 2 === 0, c.clone().add(new V3(rnd(-0.3, 0.3), rnd(0, 0.3), rnd(-0.3, 0.3))), new V3(rnd(-0.8, 0.8), rnd(0.6, 1.2), rnd(-0.8, 0.8)));
+  removeAnims.push({ obj: entry.obj, t: 0, s0: (entry.obj.userData.fullScale || entry.obj.scale).clone() });
+  sfx.drop();
+}
+const trashV = new V3();
+function updatePlaced(dt) {
+  for (let i = removeAnims.length - 1; i >= 0; i--) {
+    const a = removeAnims[i]; a.t = Math.min(1, a.t + dt / 0.25);
+    a.obj.scale.copy(a.s0).multiplyScalar(Math.max(0.001, 1 - a.t * a.t));
+    if (a.t >= 1) { scene.remove(a.obj); removeAnims.splice(i, 1); }
+  }
+  if (!placed.length) return;
+  let hovered = null;
+  if (hoverNdc.x <= 1) {
+    raycaster.setFromCamera(hoverNdc, camera);
+    const hit = raycaster.intersectObjects(placed.map(p => p.obj), true)[0];
+    if (hit) hovered = hit.object.userData.placedEntry;
+  }
+  for (const e of placed) {
+    const o = e.obj;
+    const topY = e.prop ? o.position.y - e.prop.base + e.prop.h : o.position.y + e.top;
+    trashV.set(o.position.x, topY + 0.3, o.position.z);
+    const near = Math.hypot(o.position.x - player.pos.x, o.position.z - player.pos.z) < 2.2 * player.sizeK;
+    if (near || hovered === e || e.el.matches(':hover')) e.linger = 1.2; else e.linger -= dt;
+    trashV.project(camera);
+    const onScreen = trashV.z < 1 && Math.abs(trashV.x) < 1.1 && Math.abs(trashV.y) < 1.1;
+    const show = e.linger > 0 && onScreen && !holo.open && !placing && shopEl.hidden && !(e.prop && e.prop.held);
+    e.el.classList.toggle('show', show);
+    if (show) e.el.style.transform = `translate(${((trashV.x + 1) / 2 * innerWidth - 19).toFixed(1)}px, ${((1 - trashV.y) / 2 * innerHeight - 19).toFixed(1)}px)`;
+  }
+}
+
 const ray = new THREE.Ray(), hitP = new V3(), toCam = new V3();
 function updateCamera(dt) {
-  const goal = new V3(player.pos.x, player.pos.y + 0.45, player.pos.z);
+  // while the gem screen is open, look a little higher so Kiboroni sits below the hologram
+  const goal = new V3(player.pos.x, player.pos.y + 0.45 * player.sizeK + holo.k * cam.dist * 0.3, player.pos.z);
   cam.target.lerp(goal, 1 - Math.exp(-8 * dt));
   const cp = Math.cos(cam.pitch);
   camera.position.set(
@@ -1419,6 +2137,12 @@ function frame() {
   updateHeld(dt);
   updateCamera(dt);
   updateBubbles(dt, t);
+  updatePlacing(dt);
+  updateSpawnAnims(dt);
+  updateHolo(dt, t);
+  updatePowers(dt, t);
+  updateSparks(dt);
+  updatePlaced(dt);
   clouds.forEach((c, i) => { c.position.x += dt * 0.3; if (c.position.x > 55) c.position.x = -55; c.position.y += Math.sin(t * 0.3 + i) * 0.002; });
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
@@ -1433,7 +2157,7 @@ addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
-window.__kibo = { player, cam, walls, colliders, camera, mouse, V3, audio, bubbles, props, grabOrDrop, getHeld: () => held };
+window.__kibo = { player, cam, walls, colliders, camera, mouse, V3, audio, bubbles, props, grabOrDrop, getHeld: () => held, SHOP, startPlacing, commitPlacing, getPlacing: () => placing, holo, powers, toggleHolo, togglePower, setCharacter, placed, removePlaced, kibo };
 </script>
 </body>
 </html>
