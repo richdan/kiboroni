@@ -25,4 +25,5 @@ Then visit http://localhost:8123.
 | Gem screen (power-ups, transform) | Blue gem button | G | Blue gem button |
 | Add furniture / toys | Shop button, then click to place | R rotate, Esc cancel | Shop button, drag, then Place |
 | Remove an added item | Trash button above it | | Trash button above it |
+| Fire weapon (gumballs, boomerang) | Fire button | X (hold for gumballs) | Fire button |
 | Mute | Speaker button | M | Speaker button |

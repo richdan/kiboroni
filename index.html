@@ -18,6 +18,9 @@
   #knob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: #ff86bf; border: 3px solid #fff; }
   #jump { position: fixed; right: calc(24px + env(safe-area-inset-right, 0px)); bottom: calc(36px + env(safe-area-inset-bottom, 0px)); width: 84px; height: 84px; border-radius: 50%; background: #ff86bf; border: 4px solid #fff; color: #fff; font: 700 18px 'Fredoka', sans-serif; display: none; touch-action: none; }
   #grab { position: fixed; right: calc(120px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 70px; height: 70px; border-radius: 50%; background: #8fd3ff; border: 4px solid #fff; color: #fff; font: 700 15px 'Fredoka', sans-serif; display: none; touch-action: none; }
+  #fire { position: fixed; right: calc(24px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 78px; height: 78px; border-radius: 50%; background: #ff5a7a; border: 4px solid #fff; color: #fff; font: 700 17px 'Fredoka', sans-serif; letter-spacing: .5px; cursor: pointer; touch-action: none; box-shadow: 0 4px 14px rgba(160,40,70,.3); z-index: 5; }
+  #fire:active { transform: scale(.94); }
+  @media (pointer: coarse) { #fire { bottom: calc(140px + env(safe-area-inset-bottom, 0px)); } }
   #mute { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); width: 48px; height: 48px; border-radius: 50%; border: 3px solid #fff; background: #ff86bf; font-size: 20px; cursor: pointer; box-shadow: 0 4px 14px rgba(120,40,90,.2); }
   [hidden] { display: none !important; }
   #shopBtn { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(76px + env(safe-area-inset-right, 0px)); width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff; background: #ffb13d; color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgba(120,40,90,.25); transition: transform .15s; }
@@ -94,13 +97,14 @@
 <div id="hud">
   <h1>Kiboroni</h1>
   <div id="help">
-    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kiboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>M</b> mute · <b>Shop</b> button to add things · <b>G</b> gem powers</span>
+    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kiboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>X</b> fire weapon · <b>M</b> mute · <b>Shop</b> button to add things · <b>G</b> gem powers</span>
     <span class="touch"><b>Tap</b> the floor to walk · <b>Tap</b> an object to pick it up · <b>Tap Kiboroni</b> to put it down<br><b>Drag</b> to turn camera · <b>Pinch</b> to zoom · or use the <b>stick</b>, <b>Jump</b> &amp; <b>Grab</b> buttons · <b>Shop</b> to add things · <b>Gem</b> for powers</span>
   </div>
 </div>
 <div id="joy"><div id="knob"></div></div>
 <button id="jump">JUMP</button>
 <button id="grab">GRAB</button>
+<button id="fire" hidden>FIRE</button>
 <button id="mute" title="Sound on/off (M)">🔊</button>
 <button id="shopBtn" title="Shop" aria-label="Open the shop">
   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -131,7 +135,7 @@
     </div>
     <div class="holo-tabs" role="tablist" id="holoTabs"></div>
     <div class="holo-grid" id="holoGrid"></div>
-    <div class="holo-foot">Press <b>G</b> to switch off the gem</div>
+    <div class="holo-foot">Press <b>G</b> to switch off the gem · <b>X</b> or <b>Fire</b> uses your weapon</div>
   </div>
 </div>
 <div id="trashLayer"></div>
@@ -859,12 +863,18 @@ scene.updateMatrixWorld(true);
 // ---------------------------------------------------------------------------
 scene.updateMatrixWorld(true);
 const colliders = [];
+// every top-level furniture group (not walls) can be lifted with Super Strength
+const heavies = new Set();
+function topOwner(o) { while (o.parent && o.parent !== scene) o = o.parent; return o; }
 {
   const b = new THREE.Box3();
+  const wallGroups = new Set(Object.values(walls).map(w => w.group));
   scene.traverse(o => {
     if (!o.isMesh || !o.userData.solid) return;
     b.setFromObject(o);
-    colliders.push({ minX: b.min.x, maxX: b.max.x, minZ: b.min.z, maxZ: b.max.z, minY: b.min.y, top: b.max.y });
+    const owner = topOwner(o);
+    colliders.push({ minX: b.min.x, maxX: b.max.x, minZ: b.min.z, maxZ: b.max.z, minY: b.min.y, top: b.max.y, owner });
+    if (owner.isGroup && !wallGroups.has(owner)) heavies.add(owner);
   });
 }
 const STEP = 0.22;
@@ -1054,13 +1064,14 @@ const player = {
 // Input
 // ---------------------------------------------------------------------------
 const keys = {};
-let jumpHeld = false, jumpPressed = false;
+let jumpHeld = false, jumpPressed = false, firePressed = false;
 addEventListener('keydown', e => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.code === 'Space' && !e.repeat) jumpPressed = true;
   if (e.code === 'Escape') { if (holo.open) toggleHolo(false); else if (!shopEl.hidden) closeShop(); else if (placing) endPlacing(); }
   if (e.code === 'KeyG' && !e.repeat) toggleHolo();
   if (holo.open) return;
+  if (e.code === 'KeyX' && !e.repeat) firePressed = true;
   if (placing && e.code === 'KeyR' && !e.repeat) rotatePlacing();
   if (placing && e.code === 'Enter') commitPlacing();
   if (!shopEl.hidden) return;
@@ -1083,7 +1094,7 @@ function selectAt(e) {
   setNdc(e); mouse.stuckT = 0; mouse.lastDist = 1e9; mouse.grabProp = null;
   const hit = pickAtMouse();
   if (hit === 'self') { mouse.target = null; if (held) dropHeld(); return false; }
-  if (hit) { mouse.grabProp = hit; mouse.target = hit.obj.position.clone(); return false; }
+  if (hit) { mouse.grabProp = hit; mouse.target = (hit.heavy || hit.obj).position.clone(); return false; }
   const p = mouseGroundPoint(); if (p) mouse.target = (mouse.target || new V3()).copy(p);
   return true;
 }
@@ -1153,10 +1164,12 @@ marker.rotation.x = -Math.PI / 2; scene.add(marker);
 const raycaster = new THREE.Raycaster(), groundPlane = new THREE.Plane(new V3(0, 1, 0), 0), planeHit = new V3();
 function pickAtMouse() {
   raycaster.setFromCamera(mouse.ndc, camera);
-  const hits = raycaster.intersectObjects([kibo.root, ...props.map(p => p.obj)], true);
+  const strong = powers.has('strength');
+  const hits = raycaster.intersectObjects([kibo.root, ...props.map(p => p.obj), ...(strong ? [...heavies].filter(g => !g.userData.prop) : [])], true);
   for (const h of hits) {
     if (h.object.userData.isKibo || (held && h.object.userData.prop === held)) return 'self';
     if (h.object.userData.prop) return h.object.userData.prop;
+    if (strong && heavies.has(topOwner(h.object))) return { heavy: topOwner(h.object) };
   }
   return null;
 }
@@ -1226,7 +1239,13 @@ function updatePlayer(dt, t) {
     // walking over to an object that was clicked: grab it once in reach
     if (mouse.grabProp) {
       const gp = mouse.grabProp;
-      if (held || gp.held || !mouse.target) mouse.grabProp = null;
+      if (gp.heavy) {
+        const r = reachHeavy(gp.heavy);
+        if (held || !mouse.target || !powers.has('strength') || gp.heavy.userData.prop) mouse.grabProp = null;
+        else if (r.ok) { liftHeavy(gp.heavy); mouse.grabProp = null; mouse.target = null; }
+        else mouse.target.set(r.cx, 0, r.cz);
+      }
+      else if (held || gp.held || !mouse.target) mouse.grabProp = null;
       else if (reachable(gp).ok) { grabOrDrop(gp); mouse.grabProp = null; mouse.target = null; }
       else mouse.target.copy(gp.obj.position);
     }
@@ -1270,10 +1289,17 @@ function updatePlayer(dt, t) {
   const jumpDown = keys.Space || keys.TouchJump || mouse.held;
   if (jumpPressed && player.grounded) {
     player.vy = JUMP * mods.jump; player.grounded = false; player.squashV = -6; player.justJumped = true;
+  } else if (jumpPressed && powers.has('fly')) {
+    player.vy = Math.max(player.vy, JUMP * 0.6); player.squashV = -4; // flap higher in the air
   }
   jumpPressed = false;
   player.vy -= GRAV * dt;
-  const floating = !player.grounded && player.vy < 0 && (jumpDown || ab.float);
+  // Flying: keep holding jump to stay up at your jump height
+  const flying = powers.has('fly') && !player.grounded && jumpDown;
+  if (flying && player.vy < 0) player.vy = 0;
+  if (player.pos.y > 2.2 && player.vy > 0) player.vy *= 0.5; // keep below the walls
+  player.flying = flying;
+  const floating = !player.grounded && (player.vy < 0 || flying) && (jumpDown || ab.float);
   if (floating) player.vy = Math.max(player.vy, -1.3);
   player.inflate += ((floating ? 1 : 0) - player.inflate) * Math.min(1, dt * 10);
 
@@ -1366,18 +1392,59 @@ function reachable(p) {
   const feet = o.y - p.base;
   return { d, dx, dz, ok: d < player.r + p.r + 0.45 && feet < player.pos.y + 0.8 && feet + p.h > player.pos.y - 0.3 };
 }
+const heavyBox = new THREE.Box3();
+function reachHeavy(g) {
+  heavyBox.setFromObject(g);
+  const b = heavyBox, cx = clamp(player.pos.x, b.min.x, b.max.x), cz = clamp(player.pos.z, b.min.z, b.max.z);
+  const dx = cx - player.pos.x, dz = cz - player.pos.z, d = Math.hypot(dx, dz);
+  return { d, cx, cz, dx: (b.min.x + b.max.x) / 2 - player.pos.x, dz: (b.min.z + b.max.z) / 2 - player.pos.z,
+    ok: d < player.r + 0.5 && b.min.y < player.pos.y + 0.8 && b.max.y > player.pos.y + 0.1 };
+}
 function grabOrDrop(specific) {
   if (held) { dropHeld(); return; }
   const fx = Math.sin(player.yaw), fz = Math.cos(player.yaw);
-  let best = null, bestS = Infinity;
+  let best = null, bestS = Infinity, bestHeavy = null;
   for (const p of props) {
     if (specific && p !== specific) continue;
     const r = reachable(p);
     if (!r.ok) continue;
-    const s = r.d - (r.dx * fx + r.dz * fz) / Math.max(r.d, 1e-3) * 0.3; // prefer things in front
+    const s = r.d - p.r - (r.dx * fx + r.dz * fz) / Math.max(r.d, 1e-3) * 0.3; // prefer things in front
     if (s < bestS) { bestS = s; best = p; }
   }
-  if (best) pickUp(best);
+  if (powers.has('strength') && !specific) {
+    for (const g of heavies) {
+      if (g.userData.prop) continue; // already loose
+      const r = reachHeavy(g);
+      if (!r.ok) continue;
+      const dl = Math.hypot(r.dx, r.dz);
+      const s = r.d - (r.dx * fx + r.dz * fz) / Math.max(dl, 1e-3) * 0.3;
+      if (s < bestS) { bestS = s; best = null; bestHeavy = g; }
+    }
+  }
+  if (bestHeavy) liftHeavy(bestHeavy);
+  else if (best) pickUp(best);
+}
+// Super Strength: furniture becomes a carryable object until it is put down and settles
+function liftHeavy(g) {
+  for (let i = colliders.length - 1; i >= 0; i--) if (colliders[i].owner === g) colliders.splice(i, 1);
+  g.traverse(o => { if (o.isMesh && o.userData.solid) o.userData.wasSolid = true; });
+  const p = registerProp(g, { bounce: 0.08 });
+  p.heavy = true;
+  props.forEach(q => { if (!q.held) q.asleep = false; }); // anything resting on it drops
+  pickUp(p);
+  sfx.heave();
+}
+function solidify(p) {
+  const i = props.indexOf(p); if (i >= 0) props.splice(i, 1);
+  const g = p.obj, b = new THREE.Box3();
+  g.updateMatrixWorld(true);
+  g.traverse(o => {
+    delete o.userData.prop;
+    if (o.isMesh && o.userData.wasSolid) {
+      o.userData.solid = true; b.setFromObject(o);
+      colliders.push({ minX: b.min.x, maxX: b.max.x, minZ: b.min.z, maxZ: b.max.z, minY: b.min.y, top: b.max.y, owner: g });
+    }
+  });
 }
 function pickUp(p) {
   held = p; p.held = true; p.asleep = false; p.vel.set(0, 0, 0);
@@ -1411,14 +1478,16 @@ function updateHeld(dt) {
   if (!p.rolls) o.rotation.y = player.yaw + p.yawOff;
 }
 const qTmp = new THREE.Quaternion(), axTmp = new V3();
+const settled = [];
 function updateProps(dt) {
+  if (settled.length) { settled.forEach(solidify); settled.length = 0; }
   for (const p of props) {
     if (p.held) continue;
     const o = p.obj;
     let feet = o.position.y - p.base;
     // Kiboroni nudges things he walks into
     const dx = o.position.x - player.pos.x, dz = o.position.z - player.pos.z, d = Math.hypot(dx, dz), minD = p.r + player.r;
-    if (d < minD && d > 1e-4 && feet < player.pos.y + player.h - 0.05 && feet + p.h > player.pos.y + 0.05) {
+    if (!p.heavy && d < minD && d > 1e-4 && feet < player.pos.y + player.h - 0.05 && feet + p.h > player.pos.y + 0.05) {
       const nx = dx / d, nz = dz / d;
       o.position.x += nx * (minD - d); o.position.z += nz * (minD - d);
       const push = Math.max(1.2, player.vel.x * nx + player.vel.z * nz) * (p.rolls ? 1.4 : 0.9) * (kibo.skin.ability.push || 1) * (powers.has('shield') ? 1.5 : 1);
@@ -1455,7 +1524,7 @@ function updateProps(dt) {
       axTmp.set(mvz, 0, -mvx).normalize();
       o.quaternion.premultiply(qTmp.setFromAxisAngle(axTmp, dist / p.r));
     } else if (!p.grounded) o.rotation.y += p.spin * dt;
-    if (p.grounded && Math.hypot(p.vel.x, p.vel.z) < 0.03) { p.vel.set(0, 0, 0); p.asleep = true; }
+    if (p.grounded && Math.hypot(p.vel.x, p.vel.z) < (p.heavy ? 0.2 : 0.03)) { p.vel.set(0, 0, 0); p.asleep = true; if (p.heavy) settled.push(p); }
   }
 }
 
@@ -1509,6 +1578,13 @@ const sfx = {
   power() { [0, 1, 2].forEach(i => blip(520 * Math.pow(1.26, i), 560 * Math.pow(1.26, i), 0.09, 0.18, 'square', i * 0.07)); },
   transform() { blip(200, 900, 0.3, 0.2, 'triangle'); blip(900, 1800, 0.18, 0.12, 'sine', 0.22); },
   blipUI() { blip(900, 1100, 0.04, 0.1, 'triangle'); },
+  heave() { blip(140, 320, 0.25, 0.25, 'triangle'); blip(320, 520, 0.12, 0.15, 'triangle', 0.18); },
+  gum() { blip(260, 900, 0.06, 0.22, 'sine'); },
+  tick(r) { const c = audio.ctx; if (!c || c.currentTime - (sfx._t || 0) < 0.03) return; sfx._t = c.currentTime; blip(1400 - r * 3000, 700, 0.04, 0.08, 'triangle'); },
+  whoosh(v = 0.12) { const c = audio.ctx; if (!c || audio.muted) return; const t = c.currentTime, n = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
+    n.buffer = audio.noise; n.loop = true; bp.type = 'bandpass'; bp.frequency.setValueAtTime(600, t); bp.frequency.exponentialRampToValueAtTime(1800, t + 0.15); bp.Q.value = 2;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+    n.connect(bp).connect(g).connect(audio.master); n.start(t); n.stop(t + 0.22); },
   drop() { blip(700, 380, 0.1, 0.22, 'triangle'); },
   thud(h) { const c = audio.ctx; if (!c || c.currentTime - lastThud < 0.06) return; lastThud = c.currentTime; blip(260 - Math.min(h, 1) * 120, 90, 0.09, 0.2); },
   // a little "bloop-pop": a quick rising sine (the bubble) + a tiny click (the burst)
@@ -1782,10 +1858,11 @@ function commitPlacing() {
     obj.traverse(o => {
       if (!o.isMesh || !o.userData.solid) return;
       b.setFromObject(o);
-      const c = { minX: b.min.x, maxX: b.max.x, minZ: b.min.z, maxZ: b.max.z, minY: b.min.y, top: b.max.y };
+      const c = { minX: b.min.x, maxX: b.max.x, minZ: b.min.z, maxZ: b.max.z, minY: b.min.y, top: b.max.y, owner: obj };
       colliders.push(c); entry.cols.push(c);
     });
   }
+  if (item.kind === 'solid') heavies.add(obj);
   addPlaced(entry);
   obj.userData.fullScale = obj.scale.clone();
   obj.scale.multiplyScalar(0.01);
@@ -1835,6 +1912,10 @@ const ICONS = {
   tiny: '<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>',
   shield: '<circle cx="12" cy="12" r="9"/><path d="M8 9a4.5 4.5 0 0 1 4-2.5"/>',
   rainbow: '<path d="M2 18a10 10 0 0 1 20 0M5.5 18a6.5 6.5 0 0 1 13 0M9 18a3 3 0 0 1 6 0"/>',
+  strength: '<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
+  fly: '<path d="M2 12c3 0 6-2 8-6 0 4 1 7 2 9M22 12c-3 0-6-2-8-6 0 4-1 7-2 9"/><circle cx="12" cy="17" r="2.5"/>',
+  gumball: '<circle cx="12" cy="13" r="7"/><circle cx="9.5" cy="10.5" r="1.4"/><circle cx="14" cy="15" r="1"/><path d="M12 6V3"/>',
+  boomerang: '<path d="M4 19 11 5l2 1-5 11 11-2 1 2z"/>',
 };
 const POWERS = [
   { id: 'speed', name: 'Super Speed', about: 'Zoom around the house' },
@@ -1843,7 +1924,14 @@ const POWERS = [
   { id: 'tiny', name: 'Tiny', about: 'Shrink right down', excl: 'giant' },
   { id: 'shield', name: 'Bubble Shield', about: 'Wrapped in a big bubble' },
   { id: 'rainbow', name: 'Rainbow', about: 'Shimmer through every colour' },
+  { id: 'strength', name: 'Super Strength', about: 'Lift sofas, bookcases, anything' },
+  { id: 'fly', name: 'Flying', about: 'Hold jump to stay up in the air' },
 ];
+const WEAPONS = [
+  { id: 'gumball', name: 'Gumballs', about: 'Shoot rainbow gumballs from your mouth' },
+  { id: 'boomerang', name: 'Boomerang', about: 'Spit it out and it flies back to you' },
+];
+let weapon = null;
 const holoEl = document.getElementById('holo'), holoPanel = holoEl.querySelector('.holo-panel');
 const holoTabsEl = document.getElementById('holoTabs'), holoGridEl = document.getElementById('holoGrid');
 const gemBtn = document.getElementById('gemBtn');
@@ -1868,7 +1956,7 @@ document.getElementById('holoClose').addEventListener('click', () => toggleHolo(
 holoEl.addEventListener('pointerdown', e => { if (e.target === holoEl) toggleHolo(false); });
 
 function renderHolo() {
-  holoTabsEl.replaceChildren(...['Power-ups', 'Transform'].map((name, i) => {
+  holoTabsEl.replaceChildren(...['Power-ups', 'Weapons', 'Transform'].map((name, i) => {
     const b = document.createElement('button');
     b.textContent = name; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === holo.tab);
     b.addEventListener('click', () => { holo.tab = i; renderHolo(); sfx.blipUI(); });
@@ -1886,6 +1974,10 @@ function renderHolo() {
     holoGridEl.replaceChildren(...POWERS.map(p => card(powers.has(p.id),
       `<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[p.id]}</svg>`,
       p.name, p.about, powers.has(p.id) ? 'ON' : 'OFF', () => togglePower(p.id))));
+  } else if (holo.tab === 1) {
+    holoGridEl.replaceChildren(...WEAPONS.map(w => card(weapon === w.id,
+      `<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[w.id]}</svg>`,
+      w.name, w.about, weapon === w.id ? 'EQUIPPED' : 'EQUIP', () => equipWeapon(w.id))));
   } else {
     holoGridEl.replaceChildren(...Object.entries(SKINS).map(([id, sk]) => {
       if (!charThumbs[id]) charThumbs[id] = thumbnail({ make: () => makeKiboroni(sk).root });
@@ -1896,9 +1988,17 @@ function renderHolo() {
 }
 
 function renderPowerChips() {
-  document.getElementById('powerChips').replaceChildren(...POWERS.filter(p => powers.has(p.id)).map(p => {
-    const s = document.createElement('span'); s.textContent = p.name; return s;
+  const chips = POWERS.filter(p => powers.has(p.id)).map(p => p.name);
+  if (weapon) chips.push(`${WEAPONS.find(w => w.id === weapon).name} · X to fire`);
+  document.getElementById('powerChips').replaceChildren(...chips.map(t => {
+    const s = document.createElement('span'); s.textContent = t; return s;
   }));
+  document.getElementById('fire').hidden = !weapon;
+}
+function equipWeapon(id) {
+  weapon = weapon === id ? null : id;
+  if (weapon) sfx.power(); else sfx.holo(false);
+  renderHolo(); renderPowerChips();
 }
 function togglePower(id) {
   const p = POWERS.find(q => q.id === id);
@@ -2039,6 +2139,160 @@ function updatePowers(dt, t) {
 }
 
 // ---------------------------------------------------------------------------
+// Flying wings (shown while the Flying power-up is on)
+// ---------------------------------------------------------------------------
+const wings = new THREE.Group();
+{
+  const wm = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.6, sheen: 1, sheenColor: new THREE.Color(0xcfeaff), transparent: true, opacity: 0.95 });
+  [-1, 1].forEach(sd => {
+    const piv = new THREE.Group(); piv.position.set(sd * 0.22, 0.18, -0.4); piv.userData.side = sd;
+    for (let i = 0; i < 3; i++) {
+      const f = new THREE.Mesh(SPHG, wm); f.castShadow = true;
+      f.scale.set(0.3 - i * 0.06, 0.09, 0.035); f.position.set(sd * (0.24 - i * 0.03), 0.06 - i * 0.07, 0); f.rotation.z = sd * (0.35 + i * 0.25);
+      piv.add(f);
+    }
+    wings.add(piv);
+  });
+}
+function updateWings(t) {
+  const on = powers.has('fly');
+  if (on && wings.parent !== kibo.puff) kibo.puff.add(wings);
+  if (!on && wings.parent) wings.parent.remove(wings);
+  if (!on) return;
+  const air = !player.grounded;
+  const flap = Math.sin(t * (air ? 22 : 4)) * (air ? 0.6 : 0.15);
+  wings.children.forEach(w => { w.rotation.y = w.userData.side * (-0.5 + flap); w.rotation.z = w.userData.side * flap * 0.4; });
+  if (player.flying && Math.random() < 0.4) {
+    spark(new V3(player.pos.x + rnd(-0.3, 0.3), player.pos.y + rnd(0, 0.2), player.pos.z + rnd(-0.3, 0.3)), 0xffffff, new V3(0, -0.4, 0), 0.5, 0.03);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Weapons: gumballs and a boomerang, both fired from Kiboroni's mouth
+// ---------------------------------------------------------------------------
+const GUM_COLORS = [0xff5a7a, 0xffd34d, 0x4cb7ff, 0x5fcf7a, 0xb79cff, 0xff9f2a, 0xffffff];
+const gumGeo = new THREE.SphereGeometry(1, 18, 12), gums = [];
+let fireCool = 0, boom = null;
+const muzzle = new V3();
+function facing() { return new V3(Math.sin(player.yaw), 0, Math.cos(player.yaw)); }
+function knock(p, v, k) { // weapons shove loose objects
+  const m = p.heavy ? 0.12 : 1;
+  p.vel.x += v.x * k * m; p.vel.z += v.z * k * m; p.vel.y = Math.max(p.vel.y, 2.2 * m);
+  p.asleep = false; p.grounded = false; p.spin = rnd(-6, 6);
+}
+function fireGumball() {
+  const r = 0.075 * player.sizeK;
+  const m = new THREE.Mesh(gumGeo, C(GUM_COLORS[Math.floor(rnd(0, GUM_COLORS.length))], { roughness: 0.2 }));
+  m.castShadow = true; m.scale.setScalar(r);
+  kibo.mouth.getWorldPosition(muzzle); m.position.copy(muzzle);
+  const f = facing();
+  const vel = f.multiplyScalar(10).add(new V3(rnd(-0.6, 0.6), 1.6 + rnd(-0.4, 0.4), rnd(-0.6, 0.6))).addScaledVector(player.vel, 0.5);
+  scene.add(m);
+  gums.push({ m, vel, r, age: 0, bounces: 0 });
+  if (gums.length > 140) { const g = gums.shift(); scene.remove(g.m); }
+  player.squashV -= 2; sfx.gum();
+}
+function updateGums(dt) {
+  for (let i = gums.length - 1; i >= 0; i--) {
+    const g = gums[i], m = g.m;
+    g.age += dt;
+    g.vel.y -= GRAV * 0.55 * dt;
+    m.position.y += g.vel.y * dt;
+    tmpP.x = m.position.x + g.vel.x * dt; tmpP.z = m.position.z + g.vel.z * dt;
+    resolveCircle(tmpP, g.r, m.position.y - g.r, g.r * 2, (nx, nz) => {
+      const vn = g.vel.x * nx + g.vel.z * nz;
+      if (vn < 0) { g.vel.x -= 1.7 * vn * nx; g.vel.z -= 1.7 * vn * nz; if (-vn > 2) sfx.tick(g.r); }
+    });
+    if (tmpP.x < HOUSE.x1 + 0.2 || tmpP.x > HOUSE.x2 - 0.2) g.vel.x *= -0.7;
+    if (tmpP.z < HOUSE.z1 + 0.2 || tmpP.z > HOUSE.z2 - 0.2) g.vel.z *= -0.7;
+    m.position.x = clamp(tmpP.x, HOUSE.x1 + 0.2, HOUSE.x2 - 0.2); m.position.z = clamp(tmpP.z, HOUSE.z1 + 0.2, HOUSE.z2 - 0.2);
+    const ground = groundAt(m.position.x, m.position.z, m.position.y - g.r, g.r * 0.5);
+    if (m.position.y - g.r < ground) {
+      m.position.y = ground + g.r;
+      if (g.vel.y < 0) { if (g.vel.y < -1.5) sfx.tick(g.r); g.vel.y = -g.vel.y * 0.62; }
+      g.vel.x *= 0.88; g.vel.z *= 0.88;
+    }
+    // bonk loose objects
+    for (const p of props) {
+      if (p.held) continue;
+      const o = p.obj.position, cy = o.y - p.base + p.h / 2;
+      const dx = m.position.x - o.x, dz = m.position.z - o.z, dy = m.position.y - cy;
+      if (Math.hypot(dx, dz) < p.r * 0.85 + g.r && Math.abs(dy) < p.h / 2 + g.r) {
+        knock(p, g.vel, 0.3);
+        const d = Math.hypot(dx, dz) || 1; const vn = (g.vel.x * dx + g.vel.z * dz) / d;
+        if (vn < 0) { g.vel.x -= 1.6 * vn * dx / d; g.vel.z -= 1.6 * vn * dz / d; }
+        sfx.tick(g.r);
+      }
+    }
+    if (g.age > 6) { const k = (g.age - 6) / 0.4; m.scale.setScalar(g.r * Math.max(0.01, 1 - k)); if (k >= 1) { scene.remove(m); gums.splice(i, 1); } }
+  }
+}
+function makeBoomerang() {
+  const g = new THREE.Group(), a = C(0xff9f2a, { roughness: 0.4 }), b = C(0xffd34d, { roughness: 0.4 });
+  [-1, 1].forEach(sd => {
+    const arm = RB(0.42, 0.05, 0.11, 0.025, a, sd * 0.15, 0, 0.06, NS); arm.rotation.y = sd * 0.62; g.add(arm);
+    const stripe = RB(0.12, 0.052, 0.07, 0.02, b, sd * 0.24, 0.002, 0.13, NS); stripe.rotation.y = sd * 0.62; g.add(stripe);
+  });
+  return g;
+}
+function throwBoomerang() {
+  if (boom) return;
+  const m = makeBoomerang(); m.scale.setScalar(player.sizeK);
+  kibo.mouth.getWorldPosition(muzzle); m.position.copy(muzzle);
+  const f = facing(), side = new V3(f.z, 0, -f.x);
+  scene.add(m);
+  boom = { m, f, side, t: 0, back: false, vel: f.clone().multiplyScalar(11), hit: new Set(), whoosh: 0 };
+  player.squashV -= 3; sfx.whoosh();
+}
+function updateBoomerang(dt) {
+  if (!boom) return;
+  const b = boom, m = b.m;
+  b.t += dt;
+  m.rotation.y += dt * 26;
+  kibo.mouth.getWorldPosition(muzzle);
+  if (!b.back) {
+    // fly out, slowing and curving to one side
+    const k = b.t / 0.6;
+    b.vel.copy(b.f).multiplyScalar(11 * Math.max(0.15, 1 - k)).addScaledVector(b.side, 4 * Math.sin(Math.PI * Math.min(1, k)));
+    if (k >= 1) b.back = true;
+  } else {
+    // home back to Kiboroni wherever he is
+    const want = muzzle.clone().sub(m.position); const d = want.length();
+    want.multiplyScalar(11 / Math.max(d, 0.001));
+    b.vel.lerp(want, Math.min(1, dt * 5));
+    if (d < 0.45 || b.t > 8) { scene.remove(m); boom = null; sfx.grab(); player.squashV += 3; return; }
+  }
+  m.position.addScaledVector(b.vel, dt);
+  m.position.y += ((b.back ? muzzle.y : muzzle.y + 0.1) - m.position.y) * Math.min(1, dt * 3);
+  tmpP.x = m.position.x; tmpP.z = m.position.z;
+  resolveCircle(tmpP, 0.2, m.position.y - 0.05, 0.1, () => { if (!b.back) { b.back = true; sfx.tick(0.1); } });
+  m.position.x = clamp(tmpP.x, HOUSE.x1 + 0.3, HOUSE.x2 - 0.3); m.position.z = clamp(tmpP.z, HOUSE.z1 + 0.3, HOUSE.z2 - 0.3);
+  for (const p of props) {
+    if (p.held || b.hit.has(p)) continue;
+    const o = p.obj.position, cy = o.y - p.base + p.h / 2;
+    if (Math.hypot(m.position.x - o.x, m.position.z - o.z) < p.r + 0.25 && Math.abs(m.position.y - cy) < p.h / 2 + 0.15) {
+      b.hit.add(p); knock(p, b.vel, 0.45); sfx.tick(0.12);
+    }
+  }
+  b.whoosh -= dt; if (b.whoosh <= 0) { b.whoosh = 0.22; sfx.whoosh(0.05); }
+}
+function updateWeapons(dt) {
+  fireCool -= dt;
+  const fireDown = keys.KeyX || keys.FireBtn;
+  if (weapon === 'gumball' && (firePressed || fireDown) && fireCool <= 0 && !holo.open) { fireGumball(); fireCool = 0.13; }
+  if (weapon === 'boomerang' && firePressed && !holo.open) throwBoomerang();
+  firePressed = false;
+  updateGums(dt);
+  updateBoomerang(dt);
+}
+{
+  const fb = document.getElementById('fire');
+  fb.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); firePressed = true; keys.FireBtn = true; });
+  const up = () => { keys.FireBtn = false; };
+  fb.addEventListener('pointerup', up); fb.addEventListener('pointercancel', up); fb.addEventListener('pointerleave', up);
+}
+
+// ---------------------------------------------------------------------------
 // Items added from the shop can be removed with a little trash button
 // (shows when Kiboroni is close to the item, or when the mouse hovers it)
 // ---------------------------------------------------------------------------
@@ -2057,11 +2311,13 @@ function addPlaced(entry) {
 function removePlaced(entry) {
   const i = placed.indexOf(entry); if (i < 0) return;
   placed.splice(i, 1); entry.el.remove();
-  for (const c of entry.cols) { const j = colliders.indexOf(c); if (j >= 0) colliders.splice(j, 1); }
-  if (entry.prop) {
-    if (held === entry.prop) held = null;
-    if (mouse.grabProp === entry.prop) { mouse.grabProp = null; mouse.target = null; }
-    const j = props.indexOf(entry.prop); if (j >= 0) props.splice(j, 1);
+  for (let j = colliders.length - 1; j >= 0; j--) if (colliders[j].owner === entry.obj) colliders.splice(j, 1);
+  heavies.delete(entry.obj);
+  const pr = entry.obj.userData.prop; // a carryable item, or furniture currently lifted with Super Strength
+  if (pr) {
+    if (held === pr) held = null;
+    if (mouse.grabProp === pr) { mouse.grabProp = null; mouse.target = null; }
+    const j = props.indexOf(pr); if (j >= 0) props.splice(j, 1);
   }
   const si = spawnAnims.findIndex(a => a.obj === entry.obj); if (si >= 0) spawnAnims.splice(si, 1);
   const c = entry.obj.position.clone(); c.y += entry.top * 0.5;
@@ -2085,13 +2341,14 @@ function updatePlaced(dt) {
   }
   for (const e of placed) {
     const o = e.obj;
-    const topY = e.prop ? o.position.y - e.prop.base + e.prop.h : o.position.y + e.top;
+    const pr = o.userData.prop;
+    const topY = pr ? o.position.y - pr.base + pr.h : o.position.y + e.top;
     trashV.set(o.position.x, topY + 0.3, o.position.z);
     const near = Math.hypot(o.position.x - player.pos.x, o.position.z - player.pos.z) < 2.2 * player.sizeK;
     if (near || hovered === e || e.el.matches(':hover')) e.linger = 1.2; else e.linger -= dt;
     trashV.project(camera);
     const onScreen = trashV.z < 1 && Math.abs(trashV.x) < 1.1 && Math.abs(trashV.y) < 1.1;
-    const show = e.linger > 0 && onScreen && !holo.open && !placing && shopEl.hidden && !(e.prop && e.prop.held);
+    const show = e.linger > 0 && onScreen && !holo.open && !placing && shopEl.hidden && !(pr && pr.held);
     e.el.classList.toggle('show', show);
     if (show) e.el.style.transform = `translate(${((trashV.x + 1) / 2 * innerWidth - 19).toFixed(1)}px, ${((1 - trashV.y) / 2 * innerHeight - 19).toFixed(1)}px)`;
   }
@@ -2143,6 +2400,8 @@ function frame() {
   updatePowers(dt, t);
   updateSparks(dt);
   updatePlaced(dt);
+  updateWings(t);
+  updateWeapons(dt);
   clouds.forEach((c, i) => { c.position.x += dt * 0.3; if (c.position.x > 55) c.position.x = -55; c.position.y += Math.sin(t * 0.3 + i) * 0.002; });
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
@@ -2157,7 +2416,7 @@ addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
-window.__kibo = { player, cam, walls, colliders, camera, mouse, V3, audio, bubbles, props, grabOrDrop, getHeld: () => held, SHOP, startPlacing, commitPlacing, getPlacing: () => placing, holo, powers, toggleHolo, togglePower, setCharacter, placed, removePlaced, kibo };
+window.__kibo = { player, cam, walls, colliders, camera, mouse, V3, audio, bubbles, props, grabOrDrop, getHeld: () => held, SHOP, startPlacing, commitPlacing, getPlacing: () => placing, holo, powers, toggleHolo, togglePower, setCharacter, placed, removePlaced, kibo, heavies, equipWeapon, gums, getBoom: () => boom, colliders };
 </script>
 </body>
 </html>
