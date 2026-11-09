@@ -1,8 +1,8 @@
-# Kiboroni
+# Kirboroni
 
 _by Kibi Otfin Studios_
 
-A cosy 3D web game prototype built with [Three.js](https://threejs.org). Kiboroni, a little pink pufferfish, explores a four-room house, blowing bubbles, climbing furniture, carrying objects, decorating and snacking from the shop, and using the gem on its necklace to power up or transform. In Game mode, cute monsters (and King Grumblob) chase Kiboroni around the house.
+A cosy 3D web game prototype built with [Three.js](https://threejs.org). Kirboroni, a little pink pufferfish, explores a four-room house, blowing bubbles, climbing furniture, carrying objects, decorating and snacking from the shop, and using the gem on its necklace to power up or transform. In Game mode, cute monsters (and King Grumblob) chase Kirboroni around the house.
 
 ## Play
 
@@ -22,7 +22,7 @@ Then visit http://localhost:8123.
 | Jump | Right-click | Space | JUMP button |
 | Float | Hold left button while falling | Hold Space | Hold JUMP |
 | Pick up | Click an object | F | Tap an object, or GRAB |
-| Put down / toss | Click Kiboroni | F | Tap Kiboroni, or GRAB |
+| Put down / toss | Click Kirboroni | F | Tap Kirboroni, or GRAB |
 | Camera | Right-drag, scroll to zoom | Q / E | Drag, pinch to zoom |
 | Gem screen (power-ups, transform) | Blue gem button | G | Blue gem button |
 | Add furniture / toys | Shop button, then click to place | R rotate, Esc cancel | Shop button, drag, then Place |

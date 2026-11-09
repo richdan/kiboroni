@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Kiboroni</title>
+<title>Kirboroni</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -131,14 +131,14 @@
 </script>
 </head>
 <body>
-<div id="loading"><div>Loading Kiboroni…<div class="byline">by Kibi Otfin Studios</div></div></div>
+<div id="loading"><div>Loading Kirboroni…<div class="byline">by Kibi Otfin Studios</div></div></div>
 <div id="hud">
-  <h1>Kiboroni <span class="byline">by Kibi Otfin Studios</span></h1>
+  <h1>Kirboroni <span class="byline">by Kibi Otfin Studios</span></h1>
   <button id="helpShow" hidden aria-label="Show tips">?</button>
   <div id="help">
     <button id="helpHide" aria-label="Hide tips" title="Hide tips">✕</button>
-    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kiboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>X</b> fire weapon · <b>M</b> mute · <b>Shop</b> button to add things · <b>G</b> gem powers · <b>P</b> Play / Game mode</span>
-    <span class="touch"><b>Tap</b> the floor to walk · <b>Tap</b> an object to pick it up · <b>Tap Kiboroni</b> to put it down<br><b>Drag</b> to turn camera · <b>Pinch</b> to zoom · or use the <b>stick</b>, <b>Jump</b> &amp; <b>Grab</b> buttons · <b>Shop</b> to add things · <b>Gem</b> for powers · <b>Play/Game</b> button for monsters</span>
+    <span class="desk"><b>Click / hold left mouse</b> to walk there (hops onto furniture) · <b>Right-click</b> jump<br><b>Right-drag</b> orbit camera · <b>Scroll</b> zoom · <b>Hold left</b> while falling to float<br><b>Click an object</b> to pick it up · <b>Click Kirboroni</b> to put it down (toss it while running)<br><b>WASD / Space</b> also work · <b>F</b> grab / drop · <b>X</b> fire weapon · <b>M</b> mute · <b>Shop</b> button to add things · <b>G</b> gem powers · <b>P</b> Play / Game mode</span>
+    <span class="touch"><b>Tap</b> the floor to walk · <b>Tap</b> an object to pick it up · <b>Tap Kirboroni</b> to put it down<br><b>Drag</b> to turn camera · <b>Pinch</b> to zoom · or use the <b>stick</b>, <b>Jump</b> &amp; <b>Grab</b> buttons · <b>Shop</b> to add things · <b>Gem</b> for powers · <b>Play/Game</b> button for monsters</span>
   </div>
 </div>
 <div id="joy"><div id="knob"></div></div>
@@ -157,7 +157,7 @@
 <div id="shop" hidden>
   <div class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
     <div class="shop-head">
-      <h2 id="shopTitle">Kiboroni's Shop</h2>
+      <h2 id="shopTitle">Kirboroni's Shop</h2>
       <button id="shopClose" aria-label="Close the shop">✕</button>
     </div>
     <div class="shop-tabs" role="tablist" id="shopTabs"></div>
@@ -887,7 +887,7 @@ picture('mid', 3.0, 2.0, 1, 1.1, 0.8, paintingTex('#8fd6ff', '#ffd34d', '#ff6f91
 picture('bedroom', 5.2, 2.0, 1, 0.8, 0.8, paintingTex('#ffe0ee', '#8be38b', '#6fc3ff'), 0xffffff);
 
 // ---------------------------------------------------------------------------
-// Loose objects ("props") that Kiboroni can push, pick up, carry and drop
+// Loose objects ("props") that Kirboroni can push, pick up, carry and drop
 // ---------------------------------------------------------------------------
 const props = [];
 function registerProp(obj, { rolls = false, bounce = 0.2 } = {}) {
@@ -959,18 +959,18 @@ function groundAt(x, z, y, r) {
 }
 
 // ---------------------------------------------------------------------------
-// Kiboroni (the pink pufferfish)
+// Kirboroni (the pink pufferfish)
 // ---------------------------------------------------------------------------
-// Characters Kiboroni can transform into via the gem. ability: speed / jump multipliers, float = slow fall, push = shove harder
+// Characters Kirboroni can transform into via the gem. ability: speed / jump multipliers, float = slow fall, push = shove harder
 const SKINS = {
-  kiboroni: { name: 'Kiboroni', about: 'The original pink puffer', body: 0xff84bd, sheen: 0xffd6ea, belly: 0xffc0dc, deep: 0xff6eac, lip: 0xff9ccb, blush: 0xff4f96, glow: 0xff5fa2, ability: {} },
+  kiboroni: { name: 'Kirboroni', about: 'The original pink puffer', body: 0xff84bd, sheen: 0xffd6ea, belly: 0xffc0dc, deep: 0xff6eac, lip: 0xff9ccb, blush: 0xff4f96, glow: 0xff5fa2, ability: {} },
   spiky: { name: 'Spiky Puff', about: 'Soft spikes, shoves things harder', body: 0xffd24a, sheen: 0xfff3c4, belly: 0xfff1b8, deep: 0xffa53d, lip: 0xffb27a, blush: 0xff8a5a, glow: 0xff9f2a, extras: 'spikes', ability: { push: 1.8 } },
   jelly: { name: 'Jelly', about: 'Always drifts down gently', body: 0xb79cff, sheen: 0xf0e8ff, belly: 0xe0d4ff, deep: 0x9b7dff, lip: 0xd9c9ff, blush: 0xff7fc8, glow: 0xb08cff, extras: 'jelly', translucent: true, noFeet: true, noFins: true, ability: { float: true } },
   bunny: { name: 'Bunny Puff', about: 'Springy, bouncy jumps', body: 0xfff4f8, sheen: 0xffffff, belly: 0xffdbe9, deep: 0xffb8d4, lip: 0xffb3cf, blush: 0xff8fbf, glow: 0xff86bf, extras: 'bunny', noFins: true, ability: { jump: 1.2 } },
   robo: { name: 'Robo Puff', about: 'Zippy and fast', body: 0xa9bfd4, sheen: 0xeef5fc, belly: 0xdde7f1, deep: 0x6f88a3, lip: 0xc0cfdd, blush: 0x6fd3ff, glow: 0x4cd0ff, extras: 'robo', metal: true, ability: { speed: 1.35 } },
   froggo: { name: 'Froggo', about: 'Huge froggy leaps', body: 0x7fd96a, sheen: 0xe6ffd6, belly: 0xeaffcf, deep: 0x4fb957, lip: 0xa6e88f, blush: 0xff8fa8, glow: 0x5fcf7a, extras: 'frog', ability: { jump: 1.4 } },
 };
-function makeKiboroni(skin = SKINS.kiboroni) {
+function makeKirboroni(skin = SKINS.kiboroni) {
   const sheen = (color, sc) => new THREE.MeshPhysicalMaterial({ color, roughness: skin.metal ? 0.35 : 0.78, metalness: skin.metal ? 0.45 : 0, sheen: skin.metal ? 0 : 1, sheenRoughness: 0.45, sheenColor: new THREE.Color(sc),
     transparent: !!skin.translucent, opacity: skin.translucent ? 0.85 : 1 });
   const pink = sheen(skin.body, skin.sheen), bellyM = sheen(skin.belly, 0xffffff), deep = sheen(skin.deep, skin.sheen);
@@ -1091,7 +1091,7 @@ function makeKiboroni(skin = SKINS.kiboroni) {
   return { root, body, puff, eyes, finL, finR, tail, feet, mouth, gem, gemMat, bodyMat: pink, skin, anim };
 }
 
-const kibo = makeKiboroni(SKINS.kiboroni);
+const kibo = makeKirboroni(SKINS.kiboroni);
 const hoverNdc = new THREE.Vector2(2, 2);
 const powers = new Set();
 const mods = { speed: 1, jump: 1, size: 1 };
@@ -1139,7 +1139,7 @@ const mouse = { held: false, id: null, ndc: new THREE.Vector2(), target: null, s
 const cv = renderer.domElement;
 const setNdc = e => mouse.ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
 cv.addEventListener('contextmenu', e => e.preventDefault());
-// Click (mouse) or tap (touch) at a screen point: Kiboroni = put down, object = go get it, floor = walk there.
+// Click (mouse) or tap (touch) at a screen point: Kirboroni = put down, object = go get it, floor = walk there.
 // Returns true if it set a floor target (used for mouse hold-to-walk).
 function selectAt(e) {
   setNdc(e); mouse.stuckT = 0; mouse.lastDist = 1e9; mouse.grabProp = null;
@@ -1441,7 +1441,7 @@ function updatePlayer(dt, t) {
 }
 
 let held = null;
-let HEAD = 0.66; // top of Kiboroni's head (world units); changes with Giant / Tiny
+let HEAD = 0.66; // top of Kirboroni's head (world units); changes with Giant / Tiny
 function reachable(p) {
   const o = p.obj.position, dx = o.x - player.pos.x, dz = o.z - player.pos.z, d = Math.hypot(dx, dz);
   const feet = o.y - p.base;
@@ -1547,7 +1547,7 @@ function updateProps(dt) {
       const fd = Math.hypot(o.position.x - player.pos.x, o.position.z - player.pos.z);
       if (fd < p.r + player.r + 0.06 && feet < player.pos.y + player.h && feet + p.h > player.pos.y - 0.1) { p.eaten = true; toEat.push(p); continue; }
     }
-    // Kiboroni nudges things he walks into
+    // Kirboroni nudges things he walks into
     const dx = o.position.x - player.pos.x, dz = o.position.z - player.pos.z, d = Math.hypot(dx, dz), minD = p.r + player.r;
     if (!p.heavy && d < minD && d > 1e-4 && feet < player.pos.y + player.h - 0.05 && feet + p.h > player.pos.y + 0.05) {
       const nx = dx / d, nz = dz / d;
@@ -1687,7 +1687,7 @@ const sfx = {
 };
 
 // ---------------------------------------------------------------------------
-// Bubbles blown from Kiboroni's mouth while moving / jumping
+// Bubbles blown from Kirboroni's mouth while moving / jumping
 // ---------------------------------------------------------------------------
 const bubbleGeo = new THREE.SphereGeometry(1, 24, 16);
 const bubbleMat = new THREE.MeshPhysicalMaterial({
@@ -1767,7 +1767,7 @@ function updateBubbles(dt, t) {
 // Shop: a tabbed gallery of items that can be placed in the house
 // kind: 'solid' = furniture you bump into / stand on, 'prop' = can be carried, 'flat' = rugs
 // ---------------------------------------------------------------------------
-// ---- food (Kiboroni eats these when he bumps into them) ----
+// ---- food (Kirboroni eats these when he bumps into them) ----
 function biscuit(base, iced) {
   const g = new THREE.Group();
   const disc = CYL(0.17, 0.17, 0.05, C(base), 0, 0.03, 0, NS, 28); g.add(disc);
@@ -1973,7 +1973,7 @@ function updatePlacing(dt) {
   if (P.usePointer) {
     raycaster.setFromCamera(placeNdc, camera); groundPlane.constant = 0;
     if (raycaster.ray.intersectPlane(groundPlane, planeHit)) { P.x = planeHit.x; P.z = planeHit.z; }
-  } else { // keyboard players: the item hovers in front of Kiboroni
+  } else { // keyboard players: the item hovers in front of Kirboroni
     P.x = player.pos.x + Math.sin(player.yaw) * 1.4; P.z = player.pos.z + Math.cos(player.yaw) * 1.4;
   }
   g.rotation.y += (P.rot - g.rotation.y) * Math.min(1, (dt || 1) * 18);
@@ -2134,7 +2134,7 @@ function renderHolo() {
       w.name, w.about, weapon === w.id ? 'EQUIPPED' : 'EQUIP', () => equipWeapon(w.id))));
   } else {
     holoGridEl.replaceChildren(...Object.entries(SKINS).map(([id, sk]) => {
-      if (!charThumbs[id]) charThumbs[id] = thumbnail({ make: () => makeKiboroni(sk).root });
+      if (!charThumbs[id]) charThumbs[id] = thumbnail({ make: () => makeKirboroni(sk).root });
       const cur = kibo.skin === sk;
       return card(cur, `<img alt="" src="${charThumbs[id]}">`, sk.name, sk.about, cur ? 'CURRENT' : 'TRANSFORM', () => setCharacter(id));
     }));
@@ -2175,7 +2175,7 @@ function setCharacter(id) {
   const sk = SKINS[id];
   if (kibo.skin === sk) return;
   const old = kibo.root;
-  const fresh = makeKiboroni(sk);
+  const fresh = makeKirboroni(sk);
   fresh.root.position.copy(old.position); fresh.root.rotation.copy(old.rotation);
   scene.remove(old);
   old.traverse(o => { if (o.isMesh && o.material) o.material.dispose(); });
@@ -2337,7 +2337,7 @@ function yumLabel(text, at = null, color = null) {
 }
 
 // ---------------------------------------------------------------------------
-// Monsters: cute, silly enemies that pop up and chase Kiboroni
+// Monsters: cute, silly enemies that pop up and chase Kirboroni
 // ---------------------------------------------------------------------------
 const battle = { on: false, hearts: 5, maxHearts: 5, invuln: 0, spawnT: 5, defeated: 0, sinceBoss: 0, bossDue: false, bossWins: 0, shake: 0 };
 const BOSS_AFTER = 8;
@@ -2719,7 +2719,7 @@ function updateBattle(dt, t) {
     else e.yaw = lerpAngle(e.yaw, Math.atan2(nx, nz), Math.min(1, dt * 4));
     e.root.position.copy(e.pos); e.root.rotation.y = e.yaw;
     if (e.state === 'chase') { const sq = e.kind === 'blob' || e.boss ? Math.max(0, 0.12 - hop) : 0; e.body.scale.set(1 + sq, 1 - sq, 1 + sq); }
-    // googly eyes follow Kiboroni and jiggle
+    // googly eyes follow Kirboroni and jiggle
     e.pupils.forEach((p, k) => {
       p.parent.worldToLocal(pupilLook.set(player.pos.x, player.pos.y + 0.3, player.pos.z));
       pupilLook.z = 0; pupilLook.clampLength(0, 0.025 / e.baseScale);
@@ -2737,7 +2737,7 @@ function updateBattle(dt, t) {
       }
     }
     if (e.state === 'dying') continue;
-    // touching Kiboroni: stomp from above, or a bonk for him
+    // touching Kirboroni: stomp from above, or a bonk for him
     const pd = Math.hypot(player.pos.x - e.pos.x, player.pos.z - e.pos.z);
     if (pd < e.r + player.r * 0.9 && player.pos.y < e.pos.y + e.h && player.pos.y + player.h > e.pos.y) {
       if (player.vy < 0 && player.pos.y > e.pos.y + e.h * 0.5) {
@@ -2786,7 +2786,7 @@ function updateWings(t) {
 }
 
 // ---------------------------------------------------------------------------
-// Weapons: gumballs and a boomerang, both fired from Kiboroni's mouth
+// Weapons: gumballs and a boomerang, both fired from Kirboroni's mouth
 // ---------------------------------------------------------------------------
 const GUM_COLORS = [0xff5a7a, 0xffd34d, 0x4cb7ff, 0x5fcf7a, 0xb79cff, 0xff9f2a, 0xffffff];
 const gumGeo = new THREE.SphereGeometry(1, 18, 12), gums = [];
@@ -2875,7 +2875,7 @@ function updateBoomerang(dt) {
     b.vel.copy(b.f).multiplyScalar(11 * Math.max(0.15, 1 - k)).addScaledVector(b.side, 4 * Math.sin(Math.PI * Math.min(1, k)));
     if (k >= 1) b.back = true;
   } else {
-    // home back to Kiboroni wherever he is
+    // home back to Kirboroni wherever he is
     const want = muzzle.clone().sub(m.position); const d = want.length();
     want.multiplyScalar(11 / Math.max(d, 0.001));
     b.vel.lerp(want, Math.min(1, dt * 5));
@@ -2914,7 +2914,7 @@ function updateWeapons(dt) {
 
 // ---------------------------------------------------------------------------
 // Items added from the shop can be removed with a little trash button
-// (shows when Kiboroni is close to the item, or when the mouse hovers it)
+// (shows when Kirboroni is close to the item, or when the mouse hovers it)
 // ---------------------------------------------------------------------------
 const placed = [], trashLayer = document.getElementById('trashLayer'), removeAnims = [];
 const TRASH_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
@@ -2976,7 +2976,7 @@ function updatePlaced(dt) {
 
 const ray = new THREE.Ray(), hitP = new V3(), toCam = new V3();
 function updateCamera(dt) {
-  // while the gem screen is open, look a little higher so Kiboroni sits below the hologram
+  // while the gem screen is open, look a little higher so Kirboroni sits below the hologram
   const goal = new V3(player.pos.x, player.pos.y + 0.45 * player.sizeK + holo.k * cam.dist * 0.3, player.pos.z);
   cam.target.lerp(goal, 1 - Math.exp(-8 * dt));
   const cp = Math.cos(cam.pitch);
