@@ -1608,14 +1608,26 @@ function initAudio() {
   const len = Math.floor(audio.ctx.sampleRate * 0.03);
   audio.noise = audio.ctx.createBuffer(1, len, audio.ctx.sampleRate);
   const d = audio.noise.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-  audio.music = new Audio('audio/bubble-skip.mp3');
-  audio.music.loop = true; audio.music.volume = 0.4; audio.music.muted = audio.muted;
+  audio.calm = new Audio('audio/bubble-skip.mp3');
+  audio.fight = new Audio('audio/fight-music.mp3');
+  for (const t of [audio.calm, audio.fight]) { t.loop = true; t.volume = 0.4; t.muted = audio.muted; }
+  audio.music = audio.wantFight ? audio.fight : audio.calm;
   startMusic();
+}
+// Play mode uses the calm track; Game mode switches to the fight track (restarting it each time).
+function setMusicTrack(fight) {
+  audio.wantFight = fight;
+  const next = fight ? audio.fight : audio.calm;
+  if (!next || next === audio.music) return;
+  const prev = audio.music;
+  audio.music = next;
+  if (fight) next.currentTime = 0;
+  if (audio.musicStarted) { prev.pause(); audio.musicStarted = false; startMusic(); }
 }
 ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, initAudio, { capture: true }));
 function setMuted(m) {
   audio.muted = m;
-  if (audio.music) audio.music.muted = m;
+  for (const t of [audio.calm, audio.fight]) if (t) t.muted = m;
   document.getElementById('mute').textContent = m ? '🔇' : '🔊';
   try { localStorage.setItem('kiboroni-muted', m ? '1' : '0'); } catch (_) {}
 }
@@ -2562,6 +2574,7 @@ function setMode(game, announce = true) {
     battle.spawnT = 2.5; battle.hearts = battle.maxHearts;
     if (announce) { showBanner('Game mode: monsters incoming!'); sfx.fanfare(false); }
   }
+  setMusicTrack(game);
   renderBattle();
   try { localStorage.setItem('kiboroni-mode', game ? 'game' : 'play'); } catch (_) {}
 }
