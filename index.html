@@ -969,8 +969,73 @@ const SKINS = {
   bunny: { name: 'Bunny Puff', about: 'Springy, bouncy jumps', body: 0xfff4f8, sheen: 0xffffff, belly: 0xffdbe9, deep: 0xffb8d4, lip: 0xffb3cf, blush: 0xff8fbf, glow: 0xff86bf, extras: 'bunny', noFins: true, ability: { jump: 1.2 } },
   robo: { name: 'Robo Puff', about: 'Zippy and fast', body: 0xa9bfd4, sheen: 0xeef5fc, belly: 0xdde7f1, deep: 0x6f88a3, lip: 0xc0cfdd, blush: 0x6fd3ff, glow: 0x4cd0ff, extras: 'robo', metal: true, ability: { speed: 1.35 } },
   froggo: { name: 'Froggo', about: 'Huge froggy leaps', body: 0x7fd96a, sheen: 0xe6ffd6, belly: 0xeaffcf, deep: 0x4fb957, lip: 0xa6e88f, blush: 0xff8fa8, glow: 0x5fcf7a, extras: 'frog', ability: { jump: 1.4 } },
+  // Furniture forms: Kirboroni becomes an object from around the house. h = height in the world;
+  // eyes / mouth / gem positions are in the object's own units (front of each object faces +z).
+  chair: { name: 'Dining Chair', about: 'Scoots about on four little legs', body: 0xffb3d1, form: { make: () => chair(0xffb3d1), h: 0.85, eyes: [0.86, -0.18, 0.11, 0.07], mouth: [0.7, -0.18, 0.05], gem: [0.6, 0.27, 0.06] }, ability: {} },
+  plant: { name: 'Potted Plant', about: 'Leafy and slow, sways as it shuffles', body: 0x5ccc5e, form: { make: () => plant(1), h: 0.8, eyes: [0.36, 0.29, 0.1, 0.07], mouth: [0.2, 0.29, 0.05], gem: [0.47, 0.31, 0.06] }, ability: { speed: 0.85 } },
+  duck: { name: 'Rubber Duck', about: 'Floats down gently, like on water', body: 0xffd84a, form: { make: duck, h: 0.6, eyes: [0.43, 0.22, 0.06, 0.035], mouth: [0.33, 0.27, 0.025], gem: [0.2, 0.28, 0.03] }, ability: { float: true } },
+  fridge: { name: 'Fridge', about: 'Big, heavy and very pushy', body: 0xffd6e7, form: { make: fridge, h: 1.15, eyes: [1.75, 0.44, 0.2, 0.12], mouth: [1.5, 0.44, 0.09], gem: [1.2, 0.47, 0.1] }, ability: { speed: 0.75, push: 2.4 } },
+  beanbag: { name: 'Bean Bag', about: 'Squishy, super-bouncy jumps', body: 0xffa25a, form: { make: () => beanbag(0xffa25a), h: 0.6, eyes: [0.42, 0.58, 0.17, 0.09], mouth: [0.28, 0.63, 0.06], gem: [0.16, 0.62, 0.07] }, ability: { jump: 1.35 } },
+  teddy: { name: 'Teddy Bear', about: 'Cuddly and quick on its paws', body: 0xd99a6b, form: { make: teddy, h: 0.65, eyes: [0.575, 0.14, 0.055, 0.032], mouth: [0.47, 0.18, 0.025], gem: [0.33, 0.19, 0.035] }, ability: { speed: 1.15 } },
 };
+// Build Kirboroni-as-an-object, with the same animated parts the puffer has (eyes blink, mouth, gem, wings attach to puff)
+function makeFurnitureForm(skin) {
+  const f = skin.form;
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const model = f.make();
+  model.position.set(0, 0, 0); model.rotation.set(0, 0, 0); model.scale.setScalar(1);
+  // its own materials (so Rainbow does not recolour the real furniture), no collision volumes, not solid
+  const drop = [];
+  let biggest = null, bigV = 0;
+  model.traverse(o => {
+    if (!o.isMesh) return;
+    if (!o.visible) { drop.push(o); return; }
+    o.userData = {}; o.material = o.material.clone(); o.castShadow = true;
+    o.geometry.computeBoundingBox();
+    const s = o.geometry.boundingBox.getSize(new V3()).multiply(o.getWorldScale(new V3()));
+    const v = s.x * s.y * s.z; if (v > bigV) { bigV = v; biggest = o; }
+  });
+  drop.forEach(o => o.parent.remove(o));
+  model.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(model), size = box.getSize(new V3());
+  const s = f.h / size.y / 0.62; // root is scaled by 0.62 in the animation loop
+  const mid = size.y / 2;
+  const puff = new THREE.Group(); puff.position.y = mid * s; body.add(puff); // squash/inflate from the middle
+  const inner = new THREE.Group(); inner.scale.setScalar(s); inner.position.y = -mid * s; puff.add(inner);
+  inner.add(model);
+  // googly eyes
+  const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x2b0d14, roughness: 0.25 });
+  const shine = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const [ey, ez, ex, er] = f.eyes;
+  const eyes = [-1, 1].map(side => {
+    const outer = new THREE.Group(); outer.position.set(side * ex, ey, ez); outer.scale.setScalar(er);
+    const g = new THREE.Group(); outer.add(g);
+    const w = new THREE.Mesh(SPHG, white); w.scale.set(1, 1.15, 0.55); g.add(w);
+    const p = new THREE.Mesh(SPHG, dark); p.scale.set(0.55, 0.65, 0.3); p.position.set(side * -0.1, -0.12, 0.42); g.add(p);
+    const h = new THREE.Mesh(SPHG, shine); h.scale.setScalar(0.16); h.position.set(side * -0.25, 0.12, 0.62); g.add(h);
+    inner.add(outer); return g;
+  });
+  // little smile (also where bubbles and gumballs come out)
+  const mouth = new THREE.Group();
+  { const [my, mz, mr] = f.mouth; const wrap = new THREE.Group(); wrap.position.set(0, my, mz); wrap.scale.setScalar(mr); inner.add(wrap); wrap.add(mouth);
+    const smile = new THREE.Mesh(new THREE.TorusGeometry(1, 0.22, 8, 20, Math.PI), dark); smile.rotation.z = Math.PI; mouth.add(smile); }
+  // the blue diamond gem, worn on the front
+  const gem = new THREE.Group();
+  const gemMat = new THREE.MeshPhysicalMaterial({ color: 0x3da8ff, emissive: 0x1f6fff, emissiveIntensity: 0.5, roughness: 0.08, metalness: 0.1, clearcoat: 1, flatShading: true });
+  { const [gy, gz, gr] = f.gem; const wrap = new THREE.Group(); wrap.position.set(0, gy, gz); wrap.scale.setScalar(gr); inner.add(wrap); wrap.add(gem);
+    const stone = new THREE.Mesh(new THREE.OctahedronGeometry(1, 0), gemMat); stone.scale.set(1, 1.4, 0.7); stone.castShadow = true; gem.add(stone); }
+  // the loop animates fins and feet; objects have none, so give it empty stand-ins
+  const stub = base => { const o = new THREE.Group(); o.userData.base = base; return o; };
+  const finL = stub(0), finR = stub(0), tail = stub(0), feet = [stub(), stub()];
+  const bodyMat = biggest ? biggest.material : white;
+  // a gentle hop while moving
+  const anim = (t, spd) => { inner.rotation.z = Math.sin(t * 9) * 0.05 * Math.min(1, spd); };
+  root.scale.setScalar(0.62);
+  return { root, body, puff, eyes, finL, finR, tail, feet, mouth, gem, gemMat, bodyMat, skin, anim };
+}
 function makeKirboroni(skin = SKINS.kiboroni) {
+  if (skin.form) return makeFurnitureForm(skin);
   const sheen = (color, sc) => new THREE.MeshPhysicalMaterial({ color, roughness: skin.metal ? 0.35 : 0.78, metalness: skin.metal ? 0.45 : 0, sheen: skin.metal ? 0 : 1, sheenRoughness: 0.45, sheenColor: new THREE.Color(sc),
     transparent: !!skin.translucent, opacity: skin.translucent ? 0.85 : 1 });
   const pink = sheen(skin.body, skin.sheen), bellyM = sheen(skin.belly, 0xffffff), deep = sheen(skin.deep, skin.sheen);
@@ -1276,7 +1341,8 @@ function updatePlayer(dt, t) {
   mods.jump = (powers.has('jump') ? 1.45 : 1) * (ab.jump || 1);
   mods.size = powers.has('giant') ? 1.6 : powers.has('tiny') ? 0.6 : 1;
   player.sizeK += (mods.size - player.sizeK) * Math.min(1, dt * 6);
-  player.r = 0.3 * player.sizeK; player.h = 0.68 * player.sizeK; HEAD = 0.66 * player.sizeK;
+  const formH = kibo.skin.form ? kibo.skin.form.h : 0.66; // furniture forms are taller or shorter than the puffer
+  player.r = 0.3 * player.sizeK; player.h = (formH + 0.02) * player.sizeK; HEAD = formH * player.sizeK;
   const il = Math.hypot(ix, iz); if (il > 1) { ix /= il; iz /= il; }
   if (keys.KeyQ) cam.yaw += dt * 1.8;
   if (keys.KeyE) cam.yaw -= dt * 1.8;
